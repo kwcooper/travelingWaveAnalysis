@@ -42,7 +42,7 @@ badEnds = sessions{sInd,7}; % !! could update this to good ends?
 workingDir = fullfile(ratLibPath,Rat,Session,Recording); cd(workingDir);
 
 % forces a recalculation of the data 
-force = 0;
+force = 1;
 if force
     fprintf('Forcing data recalculation...\n')
 end
@@ -57,14 +57,15 @@ end
 %%
 % !! This needs to be moved or removed...
 % new theta Extraction
-disp('Extracting theta cycles... (new extraction)');
-metho = 'hilbert';
-disp('useing ' + metho)
-root.epoch=[-inf,inf];
-band = [6,10];
-[thetaPhs,~,~] = extractThetaPhase(tInfo.signal(ref,:),tInfo.Fs,metho,band);
-[cycles,~] = parseThetaCycles(thetaPhs,tInfo.Fs,band); 
-inds = find(cycles);
+% disp('Extracting theta cycles... (new extraction)');
+% metho = 'hilbert';
+% disp('useing ' + metho)
+% root.epoch=[-inf,inf];
+% band = [6,10];
+% [thetaPhs,~,~] = extractThetaPhase(tInfo.signal(ref,:),tInfo.Fs,metho,band);
+% [cycles,~] = parseThetaCycles(thetaPhs,tInfo.Fs,band); 
+% inds = find(cycles);
+
 %%
 
 
@@ -88,26 +89,27 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%  THE BUSINESS END OF THE FUNCTION %%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-awData = processAvgWaves(root,tInfo.Fs, cycles, figInfo,chOrd);
+awData = processAvgWaves(root,tInfo.Fs, tInfo.cycles, figInfo,chOrd);
 pdData = processPeakDists(awData); 
 quiverData = processQuiver(tInfo,chTxt, figInfo);
 %  corrPlot(tInfo,chTxt, figInfo)
 %  thetaGreaterMeanPower(tInfo,figInfo)
-  %plotAvgWaveImg(root, cycles, ref, figInfo,chOrd)
+  %plotAvgWaveImg(root, tInfo.cycles, ref, figInfo,chOrd)
 % plotRawWaves(root,tInfo.Fs, figInfo)
 
-  subplotOne(awData, pdData, quiverData, figInfo)
+ subplotOne(awData, pdData, quiverData, figInfo)
 
- keyboard
+ keyboard;
 
  end
 
 % make avereaged waves 
 function [awData] = processAvgWaves(root, Fs, cycles, figInfo, chOrd)
-
+fprintf('\nMaking average waves... \n')
 CycleTs=root.b_lfp(1).ts(cycles); %finds theta cycles
 epochSize = 0.100; %sets epoch size
-fprintf('calculating based off epochs of ', epochSize, '\n');
+fprintf(['calculating based off epochs of ', num2str(epochSize), '\n']);
+keyboard;
 Epochs = [CycleTs-epochSize CycleTs+epochSize]; % grabs epochs %changed this from .125
 root.epoch=Epochs; 
 
@@ -130,18 +132,16 @@ waveData = MeanThetaWave;
 
 awData.waveData = waveData;
 awData.Fs = Fs;
-keyboard;
 
-[nElecs,tPts,nSets] = size(awData.waveData);
-nR = floor(sqrt(nSets));
-nC = ceil(nSets/nR);
-t = (1:tPts)/awData.Fs;
-disp(2.5)
-lfp_ = awData.waveData / (-1 * 2.5 * rms(awData.waveData(:)));
-offsets = repmat([1:nElecs]',1,tPts,nSets);
-lfp_ = lfp_ + offsets;
-plot(t,lfp_,'k'); axis ij 
-keyboard;
+% [nElecs,tPts,nSets] = size(awData.waveData);
+% nR = floor(sqrt(nSets));
+% nC = ceil(nSets/nR);
+% t = (1:tPts)/awData.Fs;
+% disp(2.5);
+% lfp_ = awData.waveData / (-1 * 2.5 * rms(awData.waveData(:)));
+% offsets = repmat([1:nElecs]',1,tPts,nSets);
+% lfp_ = lfp_ + offsets; 
+% plot(t,lfp_,'k'); axis ij 
 end
 
 function pdData = processPeakDists(awData)
@@ -220,9 +220,7 @@ p = polyfit(x,aps,1);
 pv = polyval(x,p);
 
 B = regress(aps', [x' ones(size(x'))]);
-keyboard;
-
-
+fprintf('B = ' + B);
 
 quiverData.avgPkShft = rad2deg(avgPkShft); %convert to degrees for plotting
 quiverData.p = p;
@@ -351,7 +349,6 @@ end
 
 title('Raw data');
 t = text(0.02,0.98,'A','Units', 'Normalized', 'VerticalAlignment', 'Top');
-s = t.FontSize;
 t.FontSize = 12;
 
 %% avg quiver Pannel
@@ -364,7 +361,6 @@ xlabel('Electrode') %!! Is this correct?
 ylabel('Degree') % !! same here
 title(['Average Peak Shift | Slope =', num2str(quiverData.p(1))]) %!! picking arbitrary slope
 t = text(0.02,0.98,'B','Units', 'Normalized', 'VerticalAlignment', 'Top');
-s = t.FontSize;
 t.FontSize = 12;
 %axis should be electrodes? maybe?
 
@@ -379,8 +375,8 @@ disp(2.5)
 lfp_ = awData.waveData / (-1 * 2.5 * rms(awData.waveData(:)));
 offsets = repmat([1:nElecs]',1,tPts,nSets);
 lfp_ = lfp_ + offsets;
-plot(t,lfp_,'k'); axis ij 
-keyboard;
+plot(t,lfp_,'k'); axis ij;
+
 
 %add the find peaks function here? %Smooth?
 
@@ -404,7 +400,6 @@ title([figInfo.name, ', ',figInfo.chOrdTxt, ', Blank (1403)'])
 %title([figInfo.name, ', ',figInfo.chOrdTxt, ', Blank (1403)']);
 %Axis should change to reflect the proper channels
 t = text(0.02,0.98,'D','Units', 'Normalized', 'VerticalAlignment', 'Top');
-s = t.FontSize;
 t.FontSize = 12;
 
 suptitle([figInfo.name, ' Data: ', figInfo.session])

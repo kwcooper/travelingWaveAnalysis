@@ -8,20 +8,20 @@ if ~force && exist('twMakeFigs_workingData.mat','file')
     fprintf('done.\n')
 else
     fprintf('Computing basic data, this may take a min \nbut don''t worry, I''ll save it when I''m done for next time\n');
-     
-     
     dsFreq = 600; 
     nChan = length(chOrd);
     fsVid = 120;
  
     %%  Data Handeling
     if ~exist('root', 'var')
-         
+        fprintf('Collecting the data...\n'); 
         %[data, timestamps, info] = load_open_ephys_data_faster(filename, varargin)
         % tmp to take advantage of epoching feature for ___________
         tmpRoot = CMBHOME.Session('name','experiment1','epoch',[-inf inf],'b_ts',[0:0.01:21.0028*60],'fs_video',120);
+        %check if there is a .kwd file
         if exist('experiment1_100.raw.kwd','file')
             tmpRoot.path_lfp = repmat({'experiment1_100.raw.kwd'},1,length(chOrd));
+        %if not, then there should be continuous files, let's iterate through them
         else
             for ch_ind = 1:length(sessions{sInd,5})
                 path_lfp{ch_ind} = ['100_CH',num2str(sessions{sInd,5}(ch_ind)),'.continuous'];
@@ -125,10 +125,12 @@ else
     
     
     % new theta Extraction
-    disp('Extracting theta cycles... (new extraction)');
+    fprintf(' \n')
+    fprintf('Extracting theta cycles... (new extraction)\n');
     metho = 'hilbert';
-    disp('useing ' + metho)
+    fprintf(['useing '  metho '\n']);
     root.epoch=[-inf,inf];
+    ref = sessions{sInd,6};
     band = [6,10];
     [thetaPhs,~,~] = extractThetaPhase(tInfo.signal(ref,:),tInfo.Fs,metho,band);
     [cycles,~] = parseThetaCycles(thetaPhs,tInfo.Fs,band); 

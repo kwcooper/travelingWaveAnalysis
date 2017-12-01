@@ -54,15 +54,15 @@ end
 
 
 %%
+% !! This needs to be moved or removed...
 % new theta Extraction
-disp('Extracting theta cycles...');
+disp('Extracting theta cycles... (new extraction)');
 metho = 'hilbert';
 disp('useing ' + metho)
 root.epoch=[-inf,inf];
 band = [6,10];
 [thetaPhs,~,~] = extractThetaPhase(tInfo.signal(ref,:),tInfo.Fs,metho,band);
 [cycles,~] = parseThetaCycles(thetaPhs,tInfo.Fs,band); 
-
 inds = find(cycles);
 %%
 
@@ -75,10 +75,10 @@ figInfo.recording = Recording;
 figInfo.saveFig = 1;
 figInfo.fnameRoot = fullfile('figs',[figInfo.name, '_', figInfo.session]);
 figInfo.fig_type = 'png'; % options = {'png','ps','pdf'}
-
 figInfo.chOrdTxt = chTxt;
 figInfo.ref = ref;
 
+% makes a folder called figs if it doesn't exist
 if ~exist('figs', 'dir')
     mkdir figs
 end
@@ -86,17 +86,61 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%  THE BUSINESS END OF THE FUNCTION %%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- awData = processAvgWaves(root,tInfo.Fs, cycles, figInfo,chOrd);
- pdData = processPeakDists(awData);
- quiverData = processQuiver(tInfo,chTxt, figInfo);
+
+awData = processAvgWaves(root,tInfo.Fs, cycles, figInfo,chOrd);
+pdData = processPeakDists(awData); 
+quiverData = processQuiver(tInfo,chTxt, figInfo);
 %  corrPlot(tInfo,chTxt, figInfo)
 %  thetaGreaterMeanPower(tInfo,figInfo)
   %plotAvgWaveImg(root, cycles, ref, figInfo,chOrd)
 % plotRawWaves(root,tInfo.Fs, figInfo)
+
   subplotOne(awData, pdData, quiverData, figInfo)
 
  keyboard
 
+ end
+
+% make avereaged waves 
+function [awData] = processAvgWaves(root, Fs, cycles, figInfo, chOrd)
+
+CycleTs=root.b_lfp(1).ts(cycles); %finds theta cycles
+epochSize = 0.100; %sets epoch size
+fprintf('calculating based off epochs of ', epochSize, '\n');
+Epochs = [CycleTs-epochSize CycleTs+epochSize]; % grabs epochs %changed this from .125
+root.epoch=Epochs; 
+
+% Iterates over each channel 
+for I=1:length(chOrd)
+    root.active_lfp=I; % Set the active channel to one of the electrodes
+    EegSnips=root.lfp.signal; % Snip the signal
+    Snips(I,:) = EegSnips; 
+    MeanThetaWave(I,:)=nanmean(catPlus(3,EegSnips),3); % Average the channel data
+end
+waveData = MeanThetaWave;
+
+% plotLFP(data, Fs, 2.5,[],0);
+% title([figInfo.name, 'Mean Theta Wave'])
+% 
+% if figInfo.saveFig
+%     plotName = 'meanWaveTrace';
+%     printFigure(gcf, [figInfo.fnameRoot, '_',plotName,'.',figInfo.fig_type],'imgType',figInfo.fig_type);
+% end
+
+awData.waveData = waveData;
+awData.Fs = Fs;
+keyboard;
+
+[nElecs,tPts,nSets] = size(awData.waveData);
+nR = floor(sqrt(nSets));
+nC = ceil(nSets/nR);
+t = (1:tPts)/awData.Fs;
+disp(2.5)
+lfp_ = awData.waveData / (-1 * 2.5 * rms(awData.waveData(:)));
+offsets = repmat([1:nElecs]',1,tPts,nSets);
+lfp_ = lfp_ + offsets;
+plot(t,lfp_,'k'); axis ij 
+keyboard;
 end
 
 function pdData = processPeakDists(awData)
@@ -278,33 +322,6 @@ polarplot(MeanThetaWave(1:end))
 %compass(MeanThetaWave(7:end))
 end
 
-function [awData] = processAvgWaves(root, Fs, cycles, figInfo, chOrd)
-
-CycleTs=root.b_lfp(1).ts(cycles);
-epochSize = .100;
-Epochs = [CycleTs-0.100 CycleTs+0.100]; %changed this from .125
-fprintf('calculating based of epochs of ', epochSize, '\n');
-root.epoch=Epochs;
-
-for I=1:length(chOrd)
-    root.active_lfp=I;
-    EegSnips=root.lfp.signal;
-    MeanThetaWave(I,:)=nanmean(catPlus(3,EegSnips),3);
-end
-waveData = MeanThetaWave;
-
-% plotLFP(data, Fs, 2.5,[],0);
-% title([figInfo.name, 'Mean Theta Wave'])
-% 
-% if figInfo.saveFig
-%     plotName = 'meanWaveTrace';
-%     printFigure(gcf, [figInfo.fnameRoot, '_',plotName,'.',figInfo.fig_type],'imgType',figInfo.fig_type);
-% end
-
-awData.waveData = waveData;
-awData.Fs = Fs;
-end
-
 function subplotOne(awData,pdData,quiverData, figInfo)
 figure;
 
@@ -362,6 +379,7 @@ lfp_ = awData.waveData / (-1 * 2.5 * rms(awData.waveData(:)));
 offsets = repmat([1:nElecs]',1,tPts,nSets);
 lfp_ = lfp_ + offsets;
 plot(t,lfp_,'k'); axis ij 
+keyboard;
 
 %add the find peaks function here? %Smooth?
 

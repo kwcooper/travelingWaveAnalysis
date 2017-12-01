@@ -10,7 +10,7 @@ else
     fprintf('Computing basic data, this may take a min \nbut don''t worry, I''ll save it when I''m done for next time\n');
      
      
-    dsFreq = 600; %data sample frequency? what is this?
+    dsFreq = 600; 
     nChan = length(chOrd);
     fsVid = 120;
  
@@ -65,7 +65,8 @@ else
     end
      
     %% Extract Theta
-     
+    
+    % create a tInfo struct which holds computed theta information for later use. 
     tInfo = {};
     tInfo.session = sessions(sInd,:);
     tInfo.Fs = root.lfp.fs;
@@ -109,6 +110,7 @@ else
     tInfo.highThetaEp_long = tInfo.highThetaEp(inds_long);
      
     %find the theta shift for high theta channels
+    fprintf('finding theta shift\n');
     clear thetaShift
     for iT = 1:length(tInfo.highThetaEp_long)
         for iC1 = 1:length(chans) 
@@ -120,6 +122,19 @@ else
     end
      
     tInfo.thetaShiftMat = cat(3,tInfo.thetaShift{:}); % used cat instead of cell2mat
+    
+    
+    % new theta Extraction
+    disp('Extracting theta cycles... (new extraction)');
+    metho = 'hilbert';
+    disp('useing ' + metho)
+    root.epoch=[-inf,inf];
+    band = [6,10];
+    [thetaPhs,~,~] = extractThetaPhase(tInfo.signal(ref,:),tInfo.Fs,metho,band);
+    [cycles,~] = parseThetaCycles(thetaPhs,tInfo.Fs,band); 
+    %inds = find(cycles);
+    
+    tInfo.cycles = cycles;
     
     fprintf('Basing calculations off of %2.2f s of data\n',size(tInfo.thetaShiftMat,3)/tInfo.Fs);
     [tInfo.thetaShiftAngle,tInfo.thetaShiftRbar] = circmean(tInfo.thetaShiftMat,3);

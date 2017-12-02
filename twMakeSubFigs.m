@@ -111,83 +111,28 @@ epochSize = 0.100; %sets epoch size
 fprintf(['calculating based off epochs of ', num2str(epochSize), '\n']);
 keyboard;
 Epochs = [CycleTs-epochSize CycleTs+epochSize]; % grabs epochs %changed this from .125
-root.epoch=Epochs; 
+root.epoch=Epochs;
 
-% Iterates over each channel 
+% Iterates over each channel
 for I=1:length(chOrd)
     root.active_lfp=I; % Set the active channel to one of the electrodes
     EegSnips=root.lfp.signal; % Snip the signal
-    Snips(I,:) = EegSnips; 
+    Snips(I,:) = EegSnips;
     MeanThetaWave(I,:)=nanmean(catPlus(3,EegSnips),3); % Average the channel data
 end
+
 waveData = MeanThetaWave;
-
-% plotLFP(data, Fs, 2.5,[],0);
-% title([figInfo.name, 'Mean Theta Wave'])
-% 
-% if figInfo.saveFig
-%     plotName = 'meanWaveTrace';
-%     printFigure(gcf, [figInfo.fnameRoot, '_',plotName,'.',figInfo.fig_type],'imgType',figInfo.fig_type);
-% end
-
 awData.waveData = waveData;
 awData.Fs = Fs;
 
-% [nElecs,tPts,nSets] = size(awData.waveData);
-% nR = floor(sqrt(nSets));
-% nC = ceil(nSets/nR);
-% t = (1:tPts)/awData.Fs;
-% disp(2.5);
-% lfp_ = awData.waveData / (-1 * 2.5 * rms(awData.waveData(:)));
-% offsets = repmat([1:nElecs]',1,tPts,nSets);
-% lfp_ = lfp_ + offsets; 
-% plot(t,lfp_,'k'); axis ij 
 end
 
 function pdData = processPeakDists(awData)
-% 
-% 
-% M = randi(99, 4, 8);
-% for k1 = 1:size(M,1)
-%     [pks,loc] = findpeaks(M(k1,:));
-%     P{k1} = [pks; loc];
-% end
-% 
-% 
-% plotLFP(data, Fs, 2.5,[],0);
-% 
-% title([figInfo.name, 'pk diff'])
-% if figInfo.saveFig
-%     plotName = 'meanWaveTrace';
-%     printFigure(gcf, [figInfo.fnameRoot, '_',plotName,'.',figInfo.fig_type],'imgType',figInfo.fig_type);
-% end
-
-%if we wanted to smooth it
-% for I=1:16
-%     root.active_lfp=I;
-%     EegSnips=root.lfp.signal;
-%     smoothMTW(I,:)=smoothts(nanmean(catPlus(3,EegSnips),3), 'g');
-% end
-% smoothMTW = MeanThetaWave(1:2:end,:);
-
-%imagesc(tsa)
-%figure; scatter(linspace(1,16,16),tInfo.thetaShiftAngle(1:16))
-%figure; imagesc(diag(tInfo.thetaShiftAngle, 1));
-%title('peak dists')
-
-
-% tmp = tInfo.thetaShiftAngle;
-% %tmp = tInfo.thetaShiftAngle(6:2:12,6:2:12);
-% d2p = [mean(diag(tmp,0)) mean(diag(tmp,-1)) mean(diag(tmp,-2)) mean(diag(tmp,-3))];
-% subplot(2,2,1); plot([0:3],rad2deg(d2p),'o-'); xlim([-0.5 3.5])
-
-
 %looks for max val index in waves
 for i = 1:size(awData.waveData,1)
     [~, pkInd(i)] = max(awData.waveData(i,:));
 end
 %figure; plot(pkInd(2:2:end))
-
 %could subtract these to normalize across sessions
 pdData.pkInd = pkInd; 
 end
@@ -196,13 +141,6 @@ end
 function [quiverData] = processQuiver(tInfo,chOrdTxt,figInfo)
 % plots the polar coherence between electrodes
 [u,v] = pol2cart(tInfo.thetaShiftAngle,tInfo.thetaShiftRbar);
-%figure; quiver(u(2:2:end,2:2:end),v(2:2:end,2:2:end)); axis ij;
-%title([figInfo.name, chOrdTxt, ', Blank (1403)']);
-
-% if figInfo.saveFig
-%     plotName = 'quiver';
-%     printFigure(gcf, [figInfo.fnameRoot, '_',plotName,'.',figInfo.fig_type],'imgType',figInfo.fig_type);
-% end
 quiverData.u = u;
 quiverData.v = v;
 

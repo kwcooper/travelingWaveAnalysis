@@ -1,18 +1,17 @@
  function twMakeSubFigs()
 % TWMAKESUBFIGS Analysis package for the traveling wave project!
-% This is Keiland's version as of 8 Nov 17
+% This is Keiland's version as of 12/4/17
 % 
 % Currently: working & in active devolopment
 
+% To do:
+% add handleing for eeg with high 60hz
+% check cross corrolation between waves
 
+% comments
 
-%2017-08-10_19-14-01 - weird one
-%2017-08-10_11-43-00 - fine
-%2017-08-11_12-54-28 - looks fine
-
-% Contains ephys file information, as well as channel mappings
-% Rat Session Recording selectedChannels? channels reference
-% Split up by rat? New file?
+% Contains ephys file information, as well as channel mappings, and good epoch data
+% Rat          Session                     Recording              selected           Channels?                                reference
 sessions = {...
 'RioNovelty',  '2017-07-27_16-00',         '2017-08-09_16-57-57',   'all',       [43 44 46 45 40 39 37 38 59 60 58 57 52 51 53 54], 8, []; ...
 'Rio',         '2017-08-10_CircleTrack',   '2017-08-10_19-14-01',   'sml',       [39 38 60 57],                                     1, []; ...
@@ -42,7 +41,7 @@ badEnds = sessions{sInd,7}; % !! could update this to good ends?
 workingDir = fullfile(ratLibPath,Rat,Session,Recording); cd(workingDir);
 
 % forces a recalculation of the data 
-force = 1;
+force = 0;
 if force
     fprintf('Forcing data recalculation...\n')
 end
@@ -109,7 +108,6 @@ fprintf('\nMaking average waves... \n')
 CycleTs=root.b_lfp(1).ts(cycles); %finds theta cycles
 epochSize = 0.100; %sets epoch size
 fprintf(['calculating based off epochs of ', num2str(epochSize), '\n']);
-keyboard;
 Epochs = [CycleTs-epochSize CycleTs+epochSize]; % grabs epochs %changed this from .125
 root.epoch=Epochs;
 
@@ -157,12 +155,14 @@ x = linspace(0,size(aps,2),size(aps,2));
 p = polyfit(x,aps,1);
 pv = polyval(x,p);
 
+% my way and Regress each return the same values
 B = regress(aps', [x' ones(size(x'))]);
-fprintf('B = ' + B);
+%fprintf(['B = ', B]);
 
 quiverData.avgPkShft = rad2deg(avgPkShft); %convert to degrees for plotting
 quiverData.p = p;
 quiverData.pv = pv;
+keyboard;
 end
 
 function corrPlot(tInfo, chOrdTxt, figInfo)

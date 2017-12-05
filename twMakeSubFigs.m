@@ -150,14 +150,23 @@ for shft = 1:size(tmp,1)
 end
 
 % calculate the slope of the average peak shift
-aps = rad2deg(avgPkShft(1,1:3)); % !! this is hardcoded to only pick first 3 to avoid the NaN's
+aps = rad2deg(avgPkShft);
+if sum(isnan(aps)) > 0 % check if there are any NaN's in the aps
+    warning('NaN''s found in the slope calculation! Truncating...\n')
+    aps = aps(1,1:3);  % !! this is hardcoded to only pick first 3 to avoid the NaN's
+end
+% Calculate slope and intercept
+% my way and Regress each return the same values (p == B)
 x = linspace(0,size(aps,2),size(aps,2)); 
 p = polyfit(x,aps,1);
 pv = polyval(x,p);
 
-% my way and Regress each return the same values
 B = regress(aps', [x' ones(size(x'))]);
-%fprintf(['B = ', B]);
+
+% double check that the slope calc is right
+if p ~= B
+    warning('p and B vals do not agree');
+end
 
 quiverData.avgPkShft = rad2deg(avgPkShft); %convert to degrees for plotting
 quiverData.p = p;
@@ -293,10 +302,11 @@ t.FontSize = 12;
 subplot(2,2,2); 
 %plot(pdData.pkInd(2:2:end)); hold on; %This looks at time between peaks
 aps = quiverData.avgPkShft;
-plot(aps) %Better; looks at average across phase
+plot(aps,'k') %Better; looks at average across phase
 %text(0,0,['slope:', quiverData.p(1)]) %doesn't work well with subplot
-xlabel('Electrode') %!! Is this correct? 
-ylabel('Degree') % !! same here
+xlim([0 5]); ylim([0 50]); %!! Needs to be canged to um spacing 
+xlabel('Microns') 
+ylabel('Degree')
 title(['Average Peak Shift | Slope =', num2str(quiverData.p(1))]) %!! picking arbitrary slope
 t = text(0.02,0.98,'B','Units', 'Normalized', 'VerticalAlignment', 'Top');
 t.FontSize = 12;
@@ -315,11 +325,7 @@ offsets = repmat([1:nElecs]',1,tPts,nSets);
 lfp_ = lfp_ + offsets;
 plot(t,lfp_,'k'); axis ij;
 
-
 %add the find peaks function here? %Smooth?
-
-
-
 
 %Change axis to reflect proper channels
 xlabel('Time') %!! Is this correct? or should it be phase?
@@ -343,3 +349,9 @@ t.FontSize = 12;
 suptitle([figInfo.name, ' Data: ', figInfo.session])
 
 end
+
+%make stem plot (looks like Jesus's drives)
+% stem(1:10)
+% ax = gca;
+% ax.XDir = 'reverse';
+% ax.YDir = 'reverse';

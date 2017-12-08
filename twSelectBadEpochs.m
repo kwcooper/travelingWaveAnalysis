@@ -1,8 +1,9 @@
 function [xCords, yCords] = twSelectBadEpochs(root, chOrd)
 % TWSELECTBADEPOCHS Gui ability to select the coordinates of the bad epochs
-% in a recording session. 
+% in a recording session.
 % Requires root object.
 
+%%
 manual = 0;
 if manual
     one = 1;
@@ -33,6 +34,35 @@ if manual
     %housekeeping
     fprintf([num2str(size(xCords,1)) " points selected."])
     
+    
+else
+    signal = root.lfp.signal;
+    
+    %% code adapted from cleanData_Intan from e 171208
+    
+    % examine the signal quality itself to find noise artifacts
+    badInds = false(length(signal),1);
+    buf = ceil(fs/2); % 500ms buffer around each artifact
+    
+    % drop saturated or flatlined data
+    t0 = [0-1e-4 0+1e-4]; % tresholds for no dV/dt
+    badInds_ = CMBHOME.Utils.ThresholdBandDetect(diff(signal),t0(1),t0(2),1,round(0.030 * fs)); % flatline data
+    for ep = 1:size(badInds_,1)
+        badInds(max(badInds_(ep,1)-buf,0):min(badInds_(ep,2)+buf,length(badInds))) = true;
+    end
+    
+    % drop high amplitude events
+    % high amplitude = 2.5 x RMS
+    sigRMS = norm(signal)/sqrt(length(signal)); % adapted from Hazem Saliba Baqaen. Hazem@brown.edu
+    badInds_ = [];
+    badInds_ = [badInds_; CMBHOME.Utils.OverThresholdDetect(signal,2.5*sigRMS,1,round(0.030 * fs))];% upward deflections
+    badInds_ = [badInds_; CMBHOME.Utils.UnderThresholdDetect(signal,-2.5*sigRMS,1,round(0.030 * fs))];% downward deflections
+    for ep = 1:size(badInds_,1)
+        badInds(max(badInds_(ep,1)-buf,1):min(badInds_(ep,2)+buf,length(badInds))) = true;
+    end
+    
+    %%
+    % plot what will be removed
     figure;
     plot(signal); hold on;
     plot(find(inds2cut),signal(inds2cut), '.')

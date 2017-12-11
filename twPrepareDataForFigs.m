@@ -86,39 +86,41 @@ else
     tic
     % extract theta with phase and power
     fprintf('theta extraction \n')
-     
     tInfo.theta_filt = nan(size(dataDS));
     tInfo.theta_phase =  nan(size(dataDS));
     tInfo.theta_amp =  nan(size(dataDS));
-    % why is this iterating through each data point, and not taking all of the data? k
+    
     for iD =  1:size(dataDS,1)
         tInfo.theta_filt(iD,:) = filtfilt(tInfo.btheta,tInfo.atheta,dataDS(iD,:)); %filter the data
         tInfo.theta_phase(iD,:) = atan2(imag(hilbert(tInfo.theta_filt(iD,:))), tInfo.theta_filt(iD,:));
         tInfo.theta_amp(iD,:) = abs(hilbert(tInfo.theta_filt(iD,:)));
     end
     toc
-    %%
-    % Focus on epochs of data with high theta amplitude
+    %% Focus on epochs with high theta amplitude
+    
+    % High theta currently defined as theta amplitude being greater than the mean amp - std amp
+    
     % high amplitude will be based on greater than 2 std above the mean
     % so, compute session-wide mean and standard deviation of theta power
-    % using the last channel (update this if another channel makes more sense)
+    % !! using the last channel (update this if another channel makes more sense)
+    
      
-    % I might need to change this k
-    % Also, why not all theta? quick n dirty or the whole project?
     ch = size(tInfo.theta_amp,1);
     tInfo.thetaMeanAmp = mean(tInfo.theta_amp(ch,:));
-    stdAmp = std(tInfo.theta_amp(ch,:));
+    tInfo.stdAmp = std(tInfo.theta_amp(ch,:));
      
-    % now find the high theta
+    % find the high theta
     %highTheta = find(theta_amp(ch,:)>(meanAmp+2*stdAmp));
     %highTheta = find(theta_amp(end,:)>(meanAmp));
-    tInfo.highTheta = find(tInfo.theta_amp(end,:)>(tInfo.thetaMeanAmp-stdAmp));
+    fprintf('finding high theta epochs\n');
+    tInfo.highTheta = find(tInfo.theta_amp(end,:)>(tInfo.thetaMeanAmp-tInfo.stdAmp));
     tInfo.highThetaEp = mat2cell(tInfo.highTheta, 1, diff([0 find([(diff(tInfo.highTheta) > 1) 1])]));
     lengthEp = cellfun(@length,tInfo.highThetaEp);
     inds_long = lengthEp>300;
     tInfo.highThetaEp_long = tInfo.highThetaEp(inds_long);
-     
-    %find the theta shift for high theta channels
+    
+    %%
+    % find the theta shift for high theta channels
     fprintf('finding theta shift\n');
     clear thetaShift
     for iT = 1:length(tInfo.highThetaEp_long)

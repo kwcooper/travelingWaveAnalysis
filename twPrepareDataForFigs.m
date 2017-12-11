@@ -1,5 +1,7 @@
 function [root,tInfo] = twPrepareDataForFigs(sInd,sessions,chOrd,force)
 % see if data has been pre-computed, if not, compute it!
+% !! TD: Should rename this to be specific for each session, loading it in for
+% each, and display the name
 if ~force && exist('twMakeFigs_workingData.mat','file')
     fprintf('Found precomputed data, loading it instead of recomputing it. . .');
     L = load('twMakeFigs_workingData.mat');
@@ -13,16 +15,18 @@ else
     fsVid = 120;
  
     %%  Data Handeling
-    if ~exist('root', 'var')
+    if ~exist('root', 'var') % !! what if it does exist...
         fprintf('Collecting the data...\n'); 
         %[data, timestamps, info] = load_open_ephys_data_faster(filename, varargin)
         % tmp to take advantage of epoching feature for ___________
         tmpRoot = CMBHOME.Session('name','experiment1','epoch',[-inf inf],'b_ts',[0:0.01:21.0028*60],'fs_video',120);
         %check if there is a .kwd file
         if exist('experiment1_100.raw.kwd','file')
+            fprintf('I found a .kwd file...\n');
             tmpRoot.path_lfp = repmat({'experiment1_100.raw.kwd'},1,length(chOrd));
         %if not, then there should be continuous files, let's iterate through them
         else
+            fprintf('I found a .kwd file...\n');
             for ch_ind = 1:length(sessions{sInd,5})
                 path_lfp{ch_ind} = ['100_CH',num2str(sessions{sInd,5}(ch_ind)),'.continuous'];
                 if ~exist(path_lfp{ch_ind},'file'), error('%s does not exist as lfp.\n',path_lfp{ch_ind}); end
@@ -32,6 +36,7 @@ else
         tmpRoot = tmpRoot.LoadLFP(1,'downsample',dsFreq,'chOrd',chOrd(1));
          
         % this is the actual CMB object we'll create, use, and return
+        % !! TD I want to add notes with the session info to the object...
         fprintf('Creating root object... \n')
         root = CMBHOME.Session('name','experiment1','epoch',[-inf inf],'b_ts',[0:1/fsVid:max(tmpRoot.b_lfp(1).ts)],'fs_video',fsVid);
         root.path_lfp = tmpRoot.path_lfp;
@@ -54,9 +59,11 @@ else
     % %end
      
     % looks for points 5 stdevs from the mean and then removes them
+    % !! Needs some love (add the new function here?)
     root = rmDataBlips(root);
      
-    %iterate through the channels
+    %iterate through the channels and create a struct for the data
+    % ContinuizeEpochs: Converts all cell arrays to arrays 
     chans = [1:nChan];
     dataDS = nan(length(chans),length(CMBHOME.Utils.ContinuizeEpochs(root.lfp.signal)));
     for i = 1:length(chans)
@@ -66,12 +73,14 @@ else
      
     %% Extract Theta
     
-    % create a tInfo struct which holds computed theta information for later use. 
+    % We seem to have stopped using root at this time... 
+    
+    % create a tInfo struct which holds computed theta information 
     tInfo = {};
     tInfo.session = sessions(sInd,:);
     tInfo.Fs = root.lfp.fs;
-    tInfo.Wn_theta = [6/(tInfo.Fs/2) 10/(tInfo.Fs/2)];
-    [tInfo.btheta,tInfo.atheta] = butter(3,tInfo.Wn_theta);
+    tInfo.Wn_theta = [6/(tInfo.Fs/2) 10/(tInfo.Fs/2)]; %filtering cutoff
+    [tInfo.btheta,tInfo.atheta] = butter(3,tInfo.Wn_theta); %find filtering coef with butterworth filter
     tInfo.signal = dataDS;
     
     tic

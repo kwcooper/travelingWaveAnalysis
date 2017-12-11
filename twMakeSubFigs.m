@@ -7,6 +7,8 @@
 % To do:
 % add handleing for eeg with high 60hz
 % check cross corrolation between waves
+%!! Add checking that session info == imported struct info (add session info to struct)
+%!! Where is each channel being specifically looked at?
 
 % comments
 
@@ -96,34 +98,42 @@ quiverData = processQuiver(tInfo,chTxt, figInfo);
   %plotAvgWaveImg(root, tInfo.cycles, ref, figInfo,chOrd)
 % plotRawWaves(root,tInfo.Fs, figInfo)
 
- subplotOne(awData, pdData, quiverData, figInfo)
+ subplotOne(root, awData, pdData, quiverData, figInfo)
 
  keyboard;
 
  end
 
-% make avereaged waves 
-function [awData] = processAvgWaves(root, Fs, cycles, figInfo, chOrd)
-fprintf('\nMaking average waves... \n')
-CycleTs=root.b_lfp(1).ts(cycles); %finds theta cycles
-epochSize = 0.100; %sets epoch size
-fprintf(['calculating based off epochs of ', num2str(epochSize), '\n']);
-Epochs = [CycleTs-epochSize CycleTs+epochSize]; % grabs epochs %changed this from .125
-root.epoch=Epochs;
-
-% Iterates over each channel
-for I=1:length(chOrd)
-    root.active_lfp=I; % Set the active channel to one of the electrodes
-    EegSnips=root.lfp.signal; % Snip the signal
-    Snips(I,:) = EegSnips;
-    MeanThetaWave(I,:)=nanmean(catPlus(3,EegSnips),3); % Average the channel data
-end
-
-waveData = MeanThetaWave;
-awData.waveData = waveData;
-awData.Fs = Fs;
-
-end
+ function [allLfp] = grabLFP(root, chOrd)
+ for I=1:length(chOrd)
+     root.active_lfp=I; 
+     signal = root.lfp.signal;
+     allLfp(I,:) = signal;
+ end
+ end
+ 
+ % make avereaged waves
+ function [awData] = processAvgWaves(root, Fs, cycles, figInfo, chOrd)
+ fprintf('\nMaking average waves... \n')
+ CycleTs=root.b_lfp(1).ts(cycles); %finds theta cycles
+ epochSize = 0.100; %sets epoch size
+ fprintf(['calculating based off epochs of ', num2str(epochSize), '\n']);
+ Epochs = [CycleTs-epochSize CycleTs+epochSize]; % grabs epochs %changed this from .125
+ root.epoch=Epochs; % !! does this need to be set back?
+ 
+ % Iterates over each channel
+ for I=1:length(chOrd)
+     root.active_lfp=I; % Set the active channel to one of the electrodes
+     EegSnips=root.lfp.signal; % Snip the signal
+     Snips(I,:) = EegSnips;
+     MeanThetaWave(I,:)=nanmean(catPlus(3,EegSnips),3); % Average the channel data
+ end
+ 
+ waveData = MeanThetaWave;
+ awData.waveData = waveData;
+ awData.Fs = Fs;
+ 
+ end
 
 function pdData = processPeakDists(awData)
 %looks for max val index in waves
@@ -171,7 +181,7 @@ end
 quiverData.avgPkShft = rad2deg(avgPkShft); %convert to degrees for plotting
 quiverData.p = p;
 quiverData.pv = pv;
-keyboard;
+%keyboard;
 end
 
 function corrPlot(tInfo, chOrdTxt, figInfo)
@@ -268,17 +278,16 @@ polarplot(MeanThetaWave(1:end))
 %compass(MeanThetaWave(7:end))
 end
 
-function subplotOne(awData,pdData,quiverData, figInfo)
+function subplotOne(root, awData,pdData,quiverData, figInfo)
 figure;
 
 %% Raw Waves Pannel
 subplot(2,2,1);
-[nElecs,tPts,nSets] = size(awData.waveData);
+lfp = root.lfp.signal;
+ts = root.lfp.ts;
+fs = root.lfp.fs;
 
-for I=1:nElecs
-    awData.waveDataSmooth(I,:)=smoothts(awData.waveData(I), 'g');
-end
-
+plot(ts,lfp);
 % x = linspace(0,size(awData.waveDataSmooth(1,1:end),2),size(awData.waveDataSmooth(1,1:end),2)); 
 % p = polyfit(x,awData.waveDataSmooth(1,1:end,1));
 % pv = polyval(x,p);

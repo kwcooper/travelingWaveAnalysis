@@ -29,9 +29,10 @@ sessions = {...
 'Romo',        'CircleTrack_2017-11-27',   '2017-11-27_12-44-08',   'sml',       [56 54 57 61 47 45 38 33],                         1, [];...
 };
 
-% This selects the session you want to analyze
-sInd = 2;
- 
+
+sInd = 2; % This selects the session you want to analyze TD: add user input
+force = 0; % forces a recalculation of the data 
+
 Rat =  sessions{sInd,1};
 Session =  sessions{sInd,2};
 Recording =  sessions{sInd,3};
@@ -42,11 +43,6 @@ badEnds = sessions{sInd,7}; % !! could update this to good ends?
 
 workingDir = fullfile(ratLibPath,Rat,Session,Recording); cd(workingDir);
 
-% forces a recalculation of the data 
-force = 0;
-if force
-    fprintf('Forcing data recalculation...\n')
-end
 
 % This is where all the data extraction is happening, the function is in a
 % sepperate file. Definitely worth looking at!
@@ -68,7 +64,6 @@ end
 % inds = find(cycles);
 
 %%
-
 
 % Set up the figure info
 figInfo = {};

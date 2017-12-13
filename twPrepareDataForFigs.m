@@ -2,6 +2,10 @@ function [root,tInfo] = twPrepareDataForFigs(sInd,sessions,chOrd,force)
 % see if data has been pre-computed, if not, compute it!
 % !! TD: Should rename this to be specific for each session, loading it in for
 % each, and display the name
+if force
+    fprintf('Forcing data recalculation...\n')
+end
+
 if ~force && exist('twMakeFigs_workingData.mat','file')
     fprintf('Found precomputed data, loading it instead of recomputing it. . .');
     L = load('twMakeFigs_workingData.mat');
@@ -135,7 +139,7 @@ else
     tInfo.thetaShiftMat = cat(3,tInfo.thetaShift{:}); % used cat instead of cell2mat
     
     
-    % new theta Extraction
+    %% new theta Extraction
     fprintf(' \n')
     fprintf('Extracting theta cycles... (new extraction)\n');
     metho = 'hilbert';
@@ -153,7 +157,8 @@ else
     [tInfo.thetaShiftAngle,tInfo.thetaShiftRbar] = circmean(tInfo.thetaShiftMat,3);
      
     % if it needed to be computed, save it out
+    % Should probably add the specific name to the session
     save('twMakeFigs_workingData.mat','root','tInfo','-v7.3');
-    fprintf('Saving precomputed data to save time next time\n');
+    fprintf('Saving precomputed data so next time is a breeze\n');
 end
 end

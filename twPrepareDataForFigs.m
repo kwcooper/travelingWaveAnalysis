@@ -65,6 +65,8 @@ else
     % looks for points 5 stdevs from the mean and then removes them
     % !! Needs some love (add the new function here?)
     root = rmDataBlips(root);
+    
+    
      
     %iterate through the channels and create a struct for the data
     % ContinuizeEpochs: Converts all cell arrays to arrays 

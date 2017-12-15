@@ -1,13 +1,20 @@
 function root = twCleanData(root)
 % twCleanData Keilands Version of rmDataBlips
 % function to find and remove the bad data points
-% Leverages Ehren's code
+% Leverages Ehren's cleanData_Intan code
 % currently uses z score to find shitty inds... 5 std dev's ?
 %twaveVersion
 % (this was quickly written by K on 11/10, needs to be more accurately updated)
 
-  badInds = abs(zscore(root.b_lfp(root.active_lfp).signal))>5;
+% find the points 5 std's
+  %badInds = abs(zscore(root.b_lfp(root.active_lfp).signal))>5;
+  
+  %Ehren's method
+  [pctDataUsed,inds2cut] = cleanData_Intan(root.lfp.signal,root.lfp.fs,'thetaDeltaRatio',2);
+  badInds = inds2cut;
+  
   sum(badInds);
+  
   badts = root.b_lfp(root.active_lfp).ts(badInds);
   badepchs = [badts-0.5,badts+0.5];
   root.epoch = badepchs;

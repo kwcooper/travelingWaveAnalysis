@@ -31,7 +31,7 @@ sessions = {...
 
 
 sInd = 2; % This selects the session you want to analyze TD: add user input
-force = 0; % forces a recalculation of the data 
+force = 1; % forces a recalculation of the data 
 
 Rat =  sessions{sInd,1};
 Session =  sessions{sInd,2};
@@ -43,7 +43,7 @@ badEnds = sessions{sInd,7}; % !! could update this to good ends?
 
 workingDir = fullfile(ratLibPath,Rat,Session,Recording); cd(workingDir);
 
-
+fprintf('Welcome to the Traveling Wave Analysis!\n');
 % This is where all the data extraction is happening, the function is in a
 % sepperate file. Definitely worth looking at!
 % This returns two structs, root, and tInfo, which are used throughout the rest 
@@ -66,15 +66,17 @@ workingDir = fullfile(ratLibPath,Rat,Session,Recording); cd(workingDir);
 %%
 
 % Set up the figure info
-figInfo = {};
-figInfo.name = Rat;
-figInfo.session = Session;
-figInfo.recording = Recording;
-figInfo.saveFig = 1;
-figInfo.fnameRoot = fullfile('figs',[figInfo.name, '_', figInfo.session]);
-figInfo.fig_type = 'png'; % options = {'png','ps','pdf'}
-figInfo.chOrdTxt = chTxt;
-figInfo.ref = ref;
+tInfo = {};
+tInfo.name = Rat;
+tInfo.session = Session;
+tInfo.recording = Recording;
+tInfo.saveFig = 1;
+%figInfo.fnameRoot = fullfile('figs',[figInfo.name, '_', figInfo.session]);
+tInfo.figDir = 'twImgDir';
+ntfigInfo.fnameRoot = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave', tInfo.figDir);
+tInfo.fig_type = 'png'; % options = {'png','ps','pdf'}
+tInfo.chOrdTxt = chTxt;
+tInfo.ref = ref;
 
 % makes a folder called figs if it doesn't exist
 if ~exist('figs', 'dir')
@@ -85,15 +87,15 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%  THE BUSINESS END OF THE FUNCTION %%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-awData = processAvgWaves(root,tInfo.Fs, tInfo.cycles, figInfo,chOrd);
+awData = processAvgWaves(root,tInfo.Fs, tInfo.cycles, tInfo,chOrd);
 pdData = processPeakDists(awData); 
-quiverData = processQuiver(tInfo,chTxt, figInfo);
+quiverData = processQuiver(tInfo,chTxt, tInfo);
 %  corrPlot(tInfo,chTxt, figInfo)
 %  thetaGreaterMeanPower(tInfo,figInfo)
   %plotAvgWaveImg(root, tInfo.cycles, ref, figInfo,chOrd)
 % plotRawWaves(root,tInfo.Fs, figInfo)
 
- subplotOne(root, awData, pdData, quiverData, figInfo)
+ subplotOne(root, awData, pdData, quiverData, tInfo)
 
  keyboard;
 
@@ -323,7 +325,6 @@ subplot(2,2,3);
 nR = floor(sqrt(nSets));
 nC = ceil(nSets/nR);
 t = (1:tPts)/awData.Fs;
-disp(2.5)
 lfp_ = awData.waveData / (-1 * 2.5 * rms(awData.waveData(:)));
 offsets = repmat([1:nElecs]',1,tPts,nSets);
 lfp_ = lfp_ + offsets;
@@ -352,6 +353,14 @@ t.FontSize = 12;
 
 suptitle([figInfo.name, ' Data: ', figInfo.session])
 
+svePlt = 1;
+if svePlt
+    subplotPath = [fullfile(figInfo.fnameRoot, [figInfo.name figInfo.recording]),'.',figInfo.fig_type];
+    printFigure(gcf,subplotPath,'imgType',figInfo.fig_type);
+    fprintf(['saved figure to ',  fullfile(subplotInfo.figDir, [figInfo.name figInfo.recording]), '\n']);
+end
+
+keyboard;
 end
 
 %make stem plot (looks like Jesus's drives)

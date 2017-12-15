@@ -1,7 +1,10 @@
 function [xCords, yCords] = twSelectBadEpochs(root, chOrd)
-% TWSELECTBADEPOCHS Gui ability to select the coordinates of the bad epochs
-% in a recording session.
-% Requires root object.
+% TWSELECTBADEPOCHS Use to find bad epochs
+% Can use manual mode with GUI or automated detection
+% Requires root object and channelOrder
+%
+% To Do: automated portion needs handling for multiple channel bad epoch
+% detection
 
 %%
 manual = 0;
@@ -36,9 +39,12 @@ if manual
     
     
 else
-    signal = root.lfp.signal;
+    %% Automated function
+    % code adapted from cleanData_Intan from e 171208
+    % td take the average
+    signal = root.lfp.signal; % !! Needs handeling for multiple channels (loop over lfp array above?)
+    fs = root.lfp.fs;
     
-    %% code adapted from cleanData_Intan from e 171208
     
     % examine the signal quality itself to find noise artifacts
     badInds = false(length(signal),1);
@@ -65,7 +71,7 @@ else
     % plot what will be removed
     figure;
     plot(signal); hold on;
-    plot(find(inds2cut),signal(inds2cut), '.')
+    plot(find(badInds),signal(badInds), '.')
     
 end
 end

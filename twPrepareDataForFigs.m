@@ -2,25 +2,23 @@ function [root,tInfo] = twPrepareDataForFigs(sInd,sessions,chOrd,force)
 % see if data has been pre-computed, if not, compute it!
 % !! TD: Should rename this to be specific for each session, loading it in for
 % each, and display the name
-if force
-    fprintf('Forcing data recalculation...\n')
-end
 
 if ~force && exist('twMakeFigs_workingData.mat','file')
     fprintf('Found precomputed data, loading it instead of recomputing it. . .');
     L = load('twMakeFigs_workingData.mat');
     root = L.root;
     tInfo = L.tInfo;
-    fprintf('done.\n')
+    fprintf(' done.\n')
 else
-    fprintf('Computing basic data, this may take a min \nbut don''t worry, I''ll save it when I''m done for next time\n');
+    fprintf('Forcing data recalculation...\n')
+    fprintf('This may take a min, but don''t worry, I''ll save it when I''m done for next time\n');
     dsFreq = 600; 
     nChan = length(chOrd);
     fsVid = 120;
  
     %%  Data Handeling
     if ~exist('root', 'var') % !! what if it does exist...
-        fprintf('Collecting the data...\n'); 
+        fprintf('\nCollecting the data...\n'); 
         %[data, timestamps, info] = load_open_ephys_data_faster(filename, varargin)
         % tmp to take advantage of epoching feature for ___________
         tmpRoot = CMBHOME.Session('name','experiment1','epoch',[-inf inf],'b_ts',[0:0.01:21.0028*60],'fs_video',120);
@@ -61,12 +59,16 @@ else
     %     root = root.LoadLFP(1:nChan,'downsample',dsFreq,'chOrd',chOrd);
     %     root.active_lfp = nChan;
     % %end
-     
+    
+    %% Clean Data
     % looks for points 5 stdevs from the mean and then removes them
-    % !! Needs some love (add the new function here?)
-    root = rmDataBlips(root);
     
+    fprintf('\nCleaning Data...\n')
+    % !! Needs some love 
+    %root = rmDataBlips(root);
     
+    %Keiland's version updated with Ehren
+    root = twCleanData(root);
      
     %iterate through the channels and create a struct for the data
     % ContinuizeEpochs: Converts all cell arrays to arrays 
@@ -91,7 +93,7 @@ else
     
     tic
     % extract theta with phase and power
-    fprintf('theta extraction \n')
+    fprintf('Theta extraction \n')
     tInfo.theta_filt = nan(size(dataDS));
     tInfo.theta_phase =  nan(size(dataDS));
     tInfo.theta_amp =  nan(size(dataDS));

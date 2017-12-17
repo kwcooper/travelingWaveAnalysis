@@ -3,15 +3,33 @@ function [root,tInfo] = twPrepareDataForFigs(sInd,sessions,chOrd,force)
 % !! TD: Should rename this to be specific for each session, loading it in for
 % each, and display the name
 
+%% Check if the files already exist and then make sure everything checks out
 if ~force && exist('twMakeFigs_workingData.mat','file')
     fprintf('Found precomputed data, loading it instead of recomputing it. . .');
     L = load('twMakeFigs_workingData.mat');
+    
+    % checking that the file we get is the file that we want (name and recording)
+    if ~strcmp(L.tInfo.session{1}, sessions{sInd,1}) || ~strcmp(L.tInfo.session{3}, sessions{sInd,3})
+        warning('imported data fields do not match requested session.')
+        
+        % TD add way to move into the forced data recalculatiion if fields
+        % dont match. 
+        keyboard;
+    end
+        
     root = L.root;
     tInfo = L.tInfo;
     fprintf(' done.\n')
 else
-    fprintf('Forcing data recalculation...\n')
+    fprintf('\nForcing data recalculation...\n')
     fprintf('This may take a min, but don''t worry, I''ll save it when I''m done for next time\n');
+    
+    %!! delete the old file if forcing recalculation to avoid tom foolery
+%     if force && exist('twMakeFigs_workingData.mat','file')
+%         fprintf('Deleting previously saved .mat file, don''y worry, I''ll make a new one!\n')
+%         delete('twMakeFigs_workingData.mat')
+%     end
+    
     dsFreq = 600; 
     nChan = length(chOrd);
     fsVid = 120;
@@ -28,7 +46,7 @@ else
             tmpRoot.path_lfp = repmat({'experiment1_100.raw.kwd'},1,length(chOrd));
         %if not, then there should be continuous files, let's iterate through them
         else
-            fprintf('I found a .kwd file...\n');
+            fprintf('I found a bunch of continous files, iterating through them...\n');
             for ch_ind = 1:length(sessions{sInd,5})
                 path_lfp{ch_ind} = ['100_CH',num2str(sessions{sInd,5}(ch_ind)),'.continuous'];
                 if ~exist(path_lfp{ch_ind},'file'), error('%s does not exist as lfp.\n',path_lfp{ch_ind}); end

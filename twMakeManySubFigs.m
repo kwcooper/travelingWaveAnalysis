@@ -15,89 +15,73 @@
 % Contains ephys file information, as well as channel mappings, and good epoch data
 % Rat          Session                     Recording              selected           Channels?                                reference
 sessions = {...
-'RioNovelty',  '2017-07-27_16-00',         '2017-08-09_16-57-57',   'all',       [43 44 46 45 40 39 37 38 59 60 58 57 52 51 53 54], 8, []; ...
 'Rio',         '2017-08-10_CircleTrack',   '2017-08-10_19-14-01',   'sml',       [39 38 60 57],                                     1, []; ...
-'Rio',         '2017-08-10_CircleTrack',   '2017-08-10_19-14-01',   'all',       [43 44 46 45 40 39 37 38 59 60 58 57 52 51 53 54], 8, []; ...
-'Rio',         '2017-08-10_CircleTrack',   '2017-08-10_11-43-00',   'all',       [43 44 46 45 40 39 37 38 59 60 58 57 52 51 53 54], 8, []; ...
 'Rio',         '2017-08-10_CircleTrack',   '2017-08-10_11-43-00',   'sml',       [39 38 60 57],                                     1, []; ...
-'Rio',         '2017-08-11_CircleTrack',   '2017-08-11_12-54-28',   'all',       [43 44 46 45 40 39 37 38 59 60 58 57 52 51 53 54], 8, []; ...
-'Rio',         '2017-08-20_CircleTrack',   '2017-08-20_12-41-36',   'all',       [11 12 14 13 8 7 5 6 27 28 26 25 20 19 21 22],     8, [];...
-'Rio',         '2017-08-22_CircleTrack',   '2017-08-22_14-01-24',   'all',       [11 12 14 13 8 7 5 6 27 28 26 25 20 19 21 22],     8, [];...
-'Tio',         '170717_1824_CircleTrack',  '2017-07-17_18-30-47',   'sml',       [43 46 40 37 59 58 52 53],                         8, [];...
 'Tio',         '170717_1824_CircleTrack',  '2017-07-17_18-30-47',   'sml',       [40 37 59 58],                                     1, [];...
-'Romo',        'CircleTrack_2017-11-22',   '2017-11-22_17-45-40',   'sml',       [56 54 57 61 47 45 38 33],                         1, [];...
-'Romo',        'CircleTrack_2017-11-27',   '2017-11-27_12-44-08',   'sml',       [56 54 57 61 47 45 38 33],                         1, [];...
 };
 
-
-sInd = 2; % This selects the session you want to analyze TD: add user input
-force = 1; % forces a recalculation of the data 
-
-Rat =  sessions{sInd,1};
-Session =  sessions{sInd,2};
-Recording =  sessions{sInd,3};
-chTxt = sessions{sInd,4};
-chOrd = sessions{sInd,5}; 
-ref = sessions{sInd,6};
-badEnds = sessions{sInd,7}; % !! could update this to good ends?
-
-workingDir = fullfile(ratLibPath,Rat,Session,Recording); cd(workingDir);
-
-
-% This is where all the data extraction is happening, the function is in a
-% sepperate file. Definitely worth looking at!
-% This returns two structs, root, and tInfo, which are used throughout the rest 
-% of the script. Checking for the already computed data happens there too. 
-[root,tInfo] = twPrepareDataForFigs(sInd,sessions,chOrd,force);
-
-
-%%
-% !! This needs to be moved or removed...
-% new theta Extraction
-% disp('Extracting theta cycles... (new extraction)');
-% metho = 'hilbert';
-% disp('useing ' + metho)
-% root.epoch=[-inf,inf];
-% band = [6,10];
-% [thetaPhs,~,~] = extractThetaPhase(tInfo.signal(ref,:),tInfo.Fs,metho,band);
-% [cycles,~] = parseThetaCycles(thetaPhs,tInfo.Fs,band); 
-% inds = find(cycles);
-
-%%
-
-% Set up the figure info
-figInfo = {};
-figInfo.name = Rat;
-figInfo.session = Session;
-figInfo.recording = Recording;
-figInfo.saveFig = 1;
-%figInfo.fnameRoot = fullfile('figs',[figInfo.name, '_', figInfo.session]);
-figInfo.fnameRoot = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave','twImgDir');
-figInfo.fig_type = 'png'; % options = {'png','ps','pdf'}
-figInfo.chOrdTxt = chTxt;
-figInfo.ref = ref;
-
-% makes a folder called figs if it doesn't exist
-if ~exist('figs', 'dir')
-    mkdir figs
+iteration = 1;
+sess2run = [1 2 3];
+for i = sess2run %Select which sessions you would like to run
+    
+    sInd = i; % This selects the session you want to analyze TD: add user input
+    force = 1; % forces a recalculation of the data
+    
+    
+    Rat =  sessions{sInd,1};
+    Session =  sessions{sInd,2};
+    Recording =  sessions{sInd,3};
+    chTxt = sessions{sInd,4};
+    chOrd = sessions{sInd,5};
+    ref = sessions{sInd,6};
+    badEnds = sessions{sInd,7}; % !! could update this to good ends?
+    
+    workingDir = fullfile(ratLibPath,Rat,Session,Recording); cd(workingDir);
+    
+    
+    fprintf(['__________________________________\n']);
+    fprintf(['Running session ', num2str(iteration), ' of ', num2str(length(sess2run)), '...\n'])
+    fprintf(['Rat: ', Rat, '  Recording: ', Recording, '\n']);
+    fprintf(['Working dir: ', workingDir(:,34:end), '\n']);
+    
+    % This is where all the data extraction is happening, the function is in a
+    % sepperate file. Definitely worth looking at!
+    % This returns two structs, root, and tInfo, which are used throughout the rest
+    % of the script. Checking for the already computed data happens there too.
+    [root,tInfo] = twPrepareDataForFigs(sInd,sessions,chOrd,force);
+    
+    
+    %% Set up figure info struct
+    figInfo = {};
+    figInfo.name = Rat;
+    figInfo.session = Session;
+    figInfo.recording = Recording;
+    figInfo.saveFig = 1;
+    %figInfo.fnameRoot = fullfile('figs',[figInfo.name, '_', figInfo.session]);
+    figInfo.figDir = 'twImgDir';
+    figInfo.fnameRoot = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave', figInfo.figDir);
+    figInfo.fig_type = 'png'; % options = {'png','ps','pdf'}
+    figInfo.chOrdTxt = chTxt;
+    figInfo.ref = ref;
+    
+    % makes a folder called figs if it doesn't exist
+    if ~exist('figs', 'dir')
+        mkdir figs
+    end
+    
+    %%
+    awData = processAvgWaves(root,tInfo.Fs, tInfo.cycles, figInfo,chOrd);
+    pdData = processPeakDists(awData);
+    quiverData = processQuiver(tInfo,chTxt, figInfo);
+    %  corrPlot(tInfo,chTxt, figInfo)
+    %  thetaGreaterMeanPower(tInfo,figInfo)
+    %plotAvgWaveImg(root, tInfo.cycles, ref, figInfo,chOrd)
+    % plotRawWaves(root,tInfo.Fs, figInfo)
+    
+    subplotOne(root, awData, pdData, quiverData, figInfo)
+    
+    iteration = iteration + 1;
 end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%  THE BUSINESS END OF THE FUNCTION %%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-awData = processAvgWaves(root,tInfo.Fs, tInfo.cycles, figInfo,chOrd);
-pdData = processPeakDists(awData); 
-quiverData = processQuiver(tInfo,chTxt, figInfo);
-%  corrPlot(tInfo,chTxt, figInfo)
-%  thetaGreaterMeanPower(tInfo,figInfo)
-  %plotAvgWaveImg(root, tInfo.cycles, ref, figInfo,chOrd)
-% plotRawWaves(root,tInfo.Fs, figInfo)
-
- subplotOne(root, awData, pdData, quiverData, figInfo)
-
- keyboard;
-
  end
 
  function [allLfp] = grabLFP(root, chOrd)
@@ -108,7 +92,7 @@ quiverData = processQuiver(tInfo,chTxt, figInfo);
  end
  end
  
- % make avereaged waves
+ % make averaged waves
  function [awData] = processAvgWaves(root, Fs, cycles, figInfo, chOrd)
  fprintf('\nMaking average waves... \n')
  CycleTs=root.b_lfp(1).ts(cycles); %finds theta cycles
@@ -284,19 +268,7 @@ ts = root.lfp.ts;
 fs = root.lfp.fs;
 
 plot(ts,lfp);
-% x = linspace(0,size(awData.waveDataSmooth(1,1:end),2),size(awData.waveDataSmooth(1,1:end),2)); 
-% p = polyfit(x,awData.waveDataSmooth(1,1:end,1));
-% pv = polyval(x,p);
-% 
-% 
-% nR = floor(sqrt(nSets));
-% nC = ceil(nSets/nR);
-% t = (1:tPts)/awData.Fs;
-% disp(2.5)
-% lfp_ = awData.waveData / (-1 * 2.5 * rms(awData.waveData(:)));
-% offsets = repmat([1:nElecs]',1,tPts,nSets);
-% lfp_ = lfp_ + offsets;
-% plot(t,lfp_,'k'); axis ij 
+
 
 
 title('Raw data');
@@ -354,16 +326,10 @@ suptitle([figInfo.name, ' Data: ', figInfo.session])
 
 svePlt = 1;
 if svePlt
-    subplotPath = [figInfo.fnameRoot, '\',[figInfo.name figInfo.recording],'.',figInfo.fig_type];
+    subplotPath = [fullfile(figInfo.fnameRoot, [figInfo.name figInfo.recording]),'.',figInfo.fig_type];
     printFigure(gcf,subplotPath,'imgType',figInfo.fig_type);
-    fprintf(['saved figure to ',  subplotPath, '\n']);
+    fprintf(['saved figure to ',  figInfo.figDir, '/ as ', [figInfo.name figInfo.recording],'\n']);
 end
 
-keyboard;
-end
 
-%make stem plot (looks like Jesus's drives)
-% stem(1:10)
-% ax = gca;
-% ax.XDir = 'reverse';
-% ax.YDir = 'reverse';
+end

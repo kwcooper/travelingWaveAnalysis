@@ -1,0 +1,335 @@
+ function twMakeManySubFigs()
+% TWMAKEMANYSUBFIGS Mkaes figs for all sessions for the traveling wave project!
+% This is Keiland's version as of 12/15/17
+% 
+% Currently: working & in active devolopment
+
+% To do:
+% add handleing for eeg with high 60hz
+% check cross corrolation between waves
+%!! Add checking that session info == imported struct info (add session info to struct)
+%!! Where is each channel being specifically looked at?
+
+% comments
+
+% Contains ephys file information, as well as channel mappings, and good epoch data
+% Rat          Session                     Recording              selected           Channels?                                reference
+sessions = {...
+'Rio',         '2017-08-10_CircleTrack',   '2017-08-10_19-14-01',   'sml',       [39 38 60 57],                                     1, []; ...
+'Rio',         '2017-08-10_CircleTrack',   '2017-08-10_11-43-00',   'sml',       [39 38 60 57],                                     1, []; ...
+'Tio',         '170717_1824_CircleTrack',  '2017-07-17_18-30-47',   'sml',       [40 37 59 58],                                     1, [];...
+};
+
+iteration = 1;
+sess2run = [1 2 3];
+for i = sess2run %Select which sessions you would like to run
+    
+    sInd = i; % This selects the session you want to analyze TD: add user input
+    force = 1; % forces a recalculation of the data
+    
+    
+    Rat =  sessions{sInd,1};
+    Session =  sessions{sInd,2};
+    Recording =  sessions{sInd,3};
+    chTxt = sessions{sInd,4};
+    chOrd = sessions{sInd,5};
+    ref = sessions{sInd,6};
+    badEnds = sessions{sInd,7}; % !! could update this to good ends?
+    
+    workingDir = fullfile(ratLibPath,Rat,Session,Recording); cd(workingDir);
+    
+    
+    fprintf(['__________________________________\n']);
+    fprintf(['Running session ', num2str(iteration), ' of ', num2str(length(sess2run)), '...\n'])
+    fprintf(['Rat: ', Rat, '  Recording: ', Recording, '\n']);
+    fprintf(['Working dir: ', workingDir(:,34:end), '\n']);
+    
+    % This is where all the data extraction is happening, the function is in a
+    % sepperate file. Definitely worth looking at!
+    % This returns two structs, root, and tInfo, which are used throughout the rest
+    % of the script. Checking for the already computed data happens there too.
+    [root,tInfo] = twPrepareDataForFigs(sInd,sessions,chOrd,force);
+    
+    
+    %% Set up figure info struct
+    figInfo = {};
+    figInfo.name = Rat;
+    figInfo.session = Session;
+    figInfo.recording = Recording;
+    figInfo.saveFig = 1;
+    %figInfo.fnameRoot = fullfile('figs',[figInfo.name, '_', figInfo.session]);
+    figInfo.figDir = 'twImgDir';
+    figInfo.fnameRoot = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave', figInfo.figDir);
+    figInfo.fig_type = 'png'; % options = {'png','ps','pdf'}
+    figInfo.chOrdTxt = chTxt;
+    figInfo.ref = ref;
+    
+    % makes a folder called figs if it doesn't exist
+    if ~exist('figs', 'dir')
+        mkdir figs
+    end
+    
+    %%
+    awData = processAvgWaves(root,tInfo.Fs, tInfo.cycles, figInfo,chOrd);
+    pdData = processPeakDists(awData);
+    quiverData = processQuiver(tInfo,chTxt, figInfo);
+    %  corrPlot(tInfo,chTxt, figInfo)
+    %  thetaGreaterMeanPower(tInfo,figInfo)
+    %plotAvgWaveImg(root, tInfo.cycles, ref, figInfo,chOrd)
+    % plotRawWaves(root,tInfo.Fs, figInfo)
+    
+    subplotOne(root, awData, pdData, quiverData, figInfo)
+    
+    iteration = iteration + 1;
+end
+ end
+
+ function [allLfp] = grabLFP(root, chOrd)
+ for I=1:length(chOrd)
+     root.active_lfp=I; 
+     signal = root.lfp.signal;
+     allLfp(I,:) = signal;
+ end
+ end
+ 
+ % make averaged waves
+ function [awData] = processAvgWaves(root, Fs, cycles, figInfo, chOrd)
+ fprintf('\nMaking average waves... \n')
+ CycleTs=root.b_lfp(1).ts(cycles); %finds theta cycles
+ epochSize = 0.100; %sets epoch size
+ fprintf(['calculating based off epochs of ', num2str(epochSize), '\n']);
+ Epochs = [CycleTs-epochSize CycleTs+epochSize]; % grabs epochs %changed this from .125
+ root.epoch=Epochs; % !! does this need to be set back?
+ 
+ % Iterates over each channel
+ for I=1:length(chOrd)
+     root.active_lfp=I; % Set the active channel to one of the electrodes
+     EegSnips=root.lfp.signal; % Snip the signal
+     Snips(I,:) = EegSnips;
+     MeanThetaWave(I,:)=nanmean(catPlus(3,EegSnips),3); % Average the channel data
+ end
+ 
+ waveData = MeanThetaWave;
+ awData.waveData = waveData;
+ awData.Fs = Fs;
+ 
+ end
+
+function pdData = processPeakDists(awData)
+%looks for max val index in waves
+for i = 1:size(awData.waveData,1)
+    [~, pkInd(i)] = max(awData.waveData(i,:));
+end
+%figure; plot(pkInd(2:2:end))
+%could subtract these to normalize across sessions
+pdData.pkInd = pkInd; 
+end
+
+
+function [quiverData] = processQuiver(tInfo,chOrdTxt,figInfo)
+% plots the polar coherence between electrodes
+[u,v] = pol2cart(tInfo.thetaShiftAngle,tInfo.thetaShiftRbar);
+quiverData.u = u;
+quiverData.v = v;
+
+% calculate the average peak shift 
+tmp = tInfo.thetaShiftAngle;
+avgPkShft = nan(1,size(tmp,1));
+for shft = 1:size(tmp,1)
+    avgPkShft(shft) = mean(diag(tmp,-shft));
+end
+
+% calculate the slope of the average peak shift
+aps = rad2deg(avgPkShft);
+if sum(isnan(aps)) > 0 % check if there are any NaN's in the aps
+    warning('NaN''s found in the slope calculation! Truncating...\n')
+    aps = aps(1,1:3);  % !! this is hardcoded to only pick first 3 to avoid the NaN's
+end
+% Calculate slope and intercept
+% my way and Regress each return the same values (p == B)
+x = linspace(0,size(aps,2),size(aps,2)); 
+p = polyfit(x,aps,1);
+pv = polyval(x,p);
+
+B = regress(aps', [x' ones(size(x'))]);
+
+% double check that the slope calc is right
+if p ~= B
+    warning('p and B vals do not agree');
+end
+
+quiverData.avgPkShft = rad2deg(avgPkShft); %convert to degrees for plotting
+quiverData.p = p;
+quiverData.pv = pv;
+%keyboard;
+end
+
+function corrPlot(tInfo, chOrdTxt, figInfo)
+%plots the coherence between each cell
+R = corr(tInfo.theta_filt');
+figure; imagesc(R);
+FirstDegMCorr = mean(diag(R,1));
+SecondDegMCorr = mean(diag(R,2)); 
+title([figInfo.name, chOrdTxt, ', Blank (1403), 1st vs 2nd neighbor corr ratio = ',num2str(FirstDegMCorr/SecondDegMCorr)]);
+if figInfo.saveFig
+    plotName = 'corLin';
+    printFigure(gcf, [figInfo.fnameRoot, '_',plotName,'.',figInfo.fig_type],'imgType',figInfo.fig_type);
+end
+
+[u,v] = pol2cart(tInfo.thetaShiftAngle,tInfo.thetaShiftRbar);
+circR = sqrt(u.^2 + v.^2); figure; imagesc(circR,[0 1]);
+title([figInfo.name, 'corr in radians']);
+if figInfo.saveFig
+    plotName = 'corCirc';
+    printFigure(gcf, [figInfo.fnameRoot, '_',plotName,'.',figInfo.fig_type],'imgType',figInfo.fig_type);
+end
+end
+
+function thetaGreaterMeanPower(tInfo, figInfo)
+%highTheta = find(theta_amp(end,:)>(meanAmp+2*stdAmp));
+tInfo.highTheta = find(tInfo.theta_amp(end,:)>(tInfo.thetaMeanAmp));
+tInfo.highThetaEp = mat2cell(tInfo.highTheta, 1, diff([0 find([(diff(tInfo.highTheta) > 1) 1])]));
+lengthEp = cellfun(@length,tInfo.highThetaEp);
+inds_long = lengthEp>300;
+tInfo.highThetaEp_long = tInfo.highThetaEp(inds_long);
+ 
+for iT = 1:length(tInfo.highThetaEp_long)
+  tInfo.thetaShift_hiTheta{iT} = circDiff(tInfo.theta_phase(1:1:end,tInfo.highThetaEp_long{iT}),1,'rad');
+end
+tInfo.thetaShiftMat_hiTheta = cell2mat(tInfo.thetaShift_hiTheta);
+
+figure;
+imagesc(tInfo.thetaShiftMat_hiTheta);
+
+bins = [-pi:0.05:pi];
+figure; 
+for i = 1:size(tInfo.thetaShiftMat_hiTheta,1)
+  subplot(size(tInfo.thetaShiftMat_hiTheta,1),1,i), hist(tInfo.thetaShiftMat_hiTheta(i,:),bins); xlim([-pi pi]); grid on; ylim([0 5000]);
+  if i==1, title([figInfo.name, '8/17/2016 14:03 Recordings. Theta > mean power.']); end
+ % ylabel([num2str(chans(i+1)) ' - ' num2str(chans(i))]);
+end
+
+if figInfo.saveFig
+    plotName = 'phaseDiffs';
+    printFigure(gcf, [figInfo.fnameRoot, '_',plotName,'.',figInfo.fig_type],'imgType',figInfo.fig_type);
+end
+end
+
+function plotRawWaves(root, Fs, figInfo)
+%make the raw waves from lfp signal
+for i=1:length(root.b_lfp)
+    rawWaves(i, :) = root.b_lfp(i).signal;
+end
+%plot raw eegWaves
+kPlotLFP(rawWaves(8:2:16,:),1:1200,Fs)
+
+%plotLFP(rawWaves(8:2:16,:), Fs);
+%figInfo.name
+
+if figInfo.saveFig
+    plotName = 'egRawLFP';
+    printFigure(gcf, [figInfo.fnameRoot, '_',plotName,'.',figInfo.fig_type],'imgType',figInfo.fig_type);
+end
+
+end
+
+function plotAvgWaveImg(root, cycles, ref, figInfo, chOrd)
+CycleTs=root.b_lfp(ref).ts(cycles);
+Epochs = [CycleTs-0.125 CycleTs+0.125];
+root.epoch=Epochs;
+
+%for each channel, fetch the eeg snips, then average them
+for I=1:length(chOrd)
+    root.active_lfp=I; 
+    EegSnips=root.lfp.signal;
+    MeanThetaWave(I,:)=nanmean(catPlus(3,EegSnips),3);
+end
+
+% figure; imagesc(MeanThetaWave);
+% title([figInfo.name, 'Mean Theta Wave; ref:' + string(ref)])
+
+% if figInfo.saveFig
+%     plotName = 'meanWaveHeatmap';
+%     printFigure(gcf, [figInfo.fnameRoot, '_',plotName,'.',figInfo.fig_type],'imgType',figInfo.fig_type);
+% end
+
+figure;
+polarplot(MeanThetaWave(1:end))
+%compass(MeanThetaWave(7:end))
+end
+
+function subplotOne(root, awData,pdData,quiverData, figInfo)
+figure;
+
+%% Raw Waves Pannel
+subplot(2,2,1);
+lfp = root.lfp.signal;
+ts = root.lfp.ts;
+fs = root.lfp.fs;
+
+plot(ts,lfp);
+
+
+
+title('Raw data');
+t = text(0.02,0.98,'A','Units', 'Normalized', 'VerticalAlignment', 'Top');
+t.FontSize = 12;
+
+%% avg quiver Pannel
+subplot(2,2,2); 
+%plot(pdData.pkInd(2:2:end)); hold on; %This looks at time between peaks
+aps = quiverData.avgPkShft;
+plot(aps,'k') %Better; looks at average across phase
+%text(0,0,['slope:', quiverData.p(1)]) %doesn't work well with subplot
+xlim([0 5]); ylim([0 50]); %!! Needs to be canged to um spacing 
+xlabel('Microns') 
+ylabel('Degree')
+title(['Average Peak Shift | Slope =', num2str(quiverData.p(1))]) %!! picking arbitrary slope
+t = text(0.02,0.98,'B','Units', 'Normalized', 'VerticalAlignment', 'Top');
+t.FontSize = 12;
+%axis should be electrodes? maybe?
+
+
+%% Averaged Waves Pannel
+subplot(2,2,3);
+[nElecs,tPts,nSets] = size(awData.waveData);
+nR = floor(sqrt(nSets));
+nC = ceil(nSets/nR);
+t = (1:tPts)/awData.Fs;
+lfp_ = awData.waveData / (-1 * 2.5 * rms(awData.waveData(:)));
+offsets = repmat([1:nElecs]',1,tPts,nSets);
+lfp_ = lfp_ + offsets;
+plot(t,lfp_,'k'); axis ij;
+
+%add the find peaks function here? %Smooth?
+
+%Change axis to reflect proper channels
+xlabel('Time') %!! Is this correct? or should it be phase?
+ylabel('Channel') % !! What about the axis though...
+title('Averaged Waves')
+t = text(0.02,0.98,'C','Units', 'Normalized', 'VerticalAlignment', 'Top');
+s = t.FontSize;
+t.FontSize = 12;
+
+%% Quiver Pannel
+subplot(2,2,4);
+quiver(quiverData.u(1:1:end,1:1:end),quiverData.v(1:1:end,1:1:end)); axis ij; 
+xlabel('Channels') % !! yeah 
+ylabel('Channels') % !! same
+title([figInfo.name, ', ',figInfo.chOrdTxt, ', Blank (1403)'])
+%title([figInfo.name, ', ',figInfo.chOrdTxt, ', Blank (1403)']);
+%Axis should change to reflect the proper channels
+t = text(0.02,0.98,'D','Units', 'Normalized', 'VerticalAlignment', 'Top');
+t.FontSize = 12;
+
+suptitle([figInfo.name, ' Data: ', figInfo.session])
+
+svePlt = 1;
+if svePlt
+    subplotPath = [fullfile(figInfo.fnameRoot, [figInfo.name figInfo.recording]),'.',figInfo.fig_type];
+    printFigure(gcf,subplotPath,'imgType',figInfo.fig_type);
+    fprintf(['saved figure to ',  figInfo.figDir, '/ as ', [figInfo.name figInfo.recording],'\n']);
+end
+
+
+end

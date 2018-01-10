@@ -33,14 +33,15 @@ ref = sessions{sInd,6};
 badEnds = sessions{sInd,7}; % !! could update this to good ends?
 
 %% Path, fetching, preprocessing
+fprintf(['Grabbing data for ', Rat, '. Recording # ', Recording, '\n']);
 
 dataPath = fullfile(ratLibPath,Rat,Session,Recording); 
-dataPath = 'C:\Users\DarthMaul\Downloads\2017-12-19_20-04-50\2017-12-19_20-04-50'; fprintf('USING TEMP ROBLE PATH - FIX ME!\n');
+%dataPath = 'C:\Users\DarthMaul\Downloads\2017-12-19_20-04-50\2017-12-19_20-04-50'; fprintf('USING TEMP ROBLE PATH - FIX ME!\n');
 fnames = dir(fullfile(dataPath,'100_CH*.continuous'));
 
-fprintf('Fetching the lfp.\n')
+fprintf('\nFetching the lfp.\n')
 fprintf('This may take some time...\n')
-[D, fs] = loadIntanLFP(chOrd,dataPath,fnames);
+[D, fs] = kLoadIntanLFP(chOrd,dataPath,fnames);
 
 fprintf('\nPrepping the data.\n')
 fprintf('(Cutting out bad epochs and grabbing theta cycles)')
@@ -52,7 +53,7 @@ root = twPrepData(D,fs,ref);
 [h,figData] = plotCycleTriggeredAvg(root);
 
 %Makes the cross corrolation plot
-twCrossCorr(root)
+%twCrossCorr(root)
 
 %quiverplot and offsets (need's work)
 %twPlotQuiver(root)

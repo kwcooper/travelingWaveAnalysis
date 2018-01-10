@@ -3,6 +3,7 @@ function twCrossCorr(root)
 %assumes that the average theta wave was precalculated and saved to root
 
 atw = root.user_def.atw;
+error('Avg theta wave is not a cross correlation - Love Ehren')
 
 % Calculate the lag from the first channel, for all channels
 for i = 1:size(atw,1)-1

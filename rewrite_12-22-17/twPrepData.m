@@ -11,6 +11,12 @@ root = CMBHOME.Session('name','experiment1','epoch',[-inf inf],'b_ts',b_ts,'fs_v
 root.user_def.lfp_origData = D;
 root.user_def.lfp_fs = fs;
 
+for i = 1:size(D,1)
+  root.b_lfp(i).signal = root.user_def.lfp_origData(i,:)'; 
+  root.b_lfp(i).fs = root.user_def.lfp_fs; 
+  root.b_lfp(i).ts = b_ts; 
+end
+
 % clean data and filter to epochs of good theta
 %filtType = 'thetaDeltaRatio'; filtParams = 2; % works okay, some fine tuning may help further rule out low theta epochs and include 
 filtType = 'thetaMag'; filtParams = [115 1000]; % works okay, some fine tuning may help further rule out low theta epochs and include 

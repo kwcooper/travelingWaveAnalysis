@@ -45,7 +45,7 @@ grid on
 
 %Save and reorrient 
 figData.CTA.avgThetaWave = avgThetaWave';
-figData.CTA.lfp_ = lfp_;
+figData.CTA.lfp_ = lfp_
 figData.CTA.t = t;
 root.user_def.atw = avgThetaWave';
-keyboard;
+keyboard

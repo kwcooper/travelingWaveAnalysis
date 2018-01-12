@@ -20,11 +20,21 @@ else
   keyboard;
 end
 
+
+%lets try with avg theta wave
+atw = figData.CTA.avgThetaWave;
+for iC1 = 1:size(D(1,:),1)
+  for iC2 = 1:size(D,1)
+    dataShift(iC1,iC2,:) = circDiff([thetaPhase(iC1,:)', thetaPhase(iC2,:)'],2,'rad');
+    % changed orientation of data
+  end
+end
+
 % we should probably epoch it now...
 
 
 % Then average the epochs... (output should be a single number?)
-
+pocs = 
 
 % Then   
 

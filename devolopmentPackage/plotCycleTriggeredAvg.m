@@ -25,8 +25,6 @@ epchData = cellfun(@(c) c(1:epchLength,:),epchData,'uni',0);
 epchData = cat(3,epchData{:});
 avgThetaWave = mean(epchData,3);
 
-keyboard;
-
 h = figure;
 [tPts,nElecs] = size(avgThetaWave);
 t = linspace(-epochSize,epochSize,epchLength);
@@ -50,4 +48,3 @@ figData.CTA.avgThetaWave = avgThetaWave';
 figData.CTA.lfp_ = lfp_;
 figData.CTA.t = t;
 root.user_def.atw = avgThetaWave';
-keyboard;

@@ -1,4 +1,4 @@
-function [h,figData] = plotCycleTriggeredAvg(root)
+function [h,CTA] = plotCycleTriggeredAvg(root)
 
 %!! Figure out which channel to do the calculations on (Reference?)
 
@@ -44,7 +44,8 @@ ltr.FontSize = 12;
 grid on
 
 %Save and reorrient 
-figData.CTA.avgThetaWave = avgThetaWave';
-figData.CTA.lfp_ = lfp_;
-figData.CTA.t = t;
+CTA.avgThetaWave = avgThetaWave';
+CTA.lfp_ = lfp_;
+CTA.t = t;
+CTA.epDat = epchData;
 root.user_def.atw = avgThetaWave';

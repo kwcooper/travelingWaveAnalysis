@@ -22,9 +22,11 @@ end
 
 
 %lets try with avg theta wave
+ed = figData.epDat;
+
 atw = figData.CTA.avgThetaWave;
-for iC1 = 1:size(D(1,:),1)
-  for iC2 = 1:size(D,1)
+for iC1 = 1:size(atw(1,:),1)
+  for iC2 = 1:size(atw,1)
     dataShift(iC1,iC2,:) = circDiff([thetaPhase(iC1,:)', thetaPhase(iC2,:)'],2,'rad');
     % changed orientation of data
   end

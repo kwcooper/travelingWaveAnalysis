@@ -3,7 +3,7 @@ fprintf('\nWelcome to the Travleing Wave Project''s Analysis Package!\n');
 %  Make subfigs; 
 %  Save root and add force to avoid calculation and recalculation
 %  add raw lfp ends to the sessions structure
-
+clear all;
 sInd = 13; % This selects the session you want to analyze TD: add user input
 force = 0; % forces a recalculation of the data 
 
@@ -72,27 +72,29 @@ if force
   fprintf('Saving precomputed data (root) so next time is a breeze!\n');
 end
 %% Plotting 
-
+figData = struct;
 %Makes the average wave plot
-[h,figData] = plotCycleTriggeredAvg(root);
-%figData.CTA.lfp_
-%figData.CTA.t
+[h,CTA] = plotCycleTriggeredAvg(root);
+figData.CTA.lfp_ = CTA.lfp_;
+figData.CTA.t = CTA.t;
 
 %offsets (needs work)
 %twPlotQuiver(root)
 
 % Raw LFP: Grabs the raw data from the specified indicies
-ind1 = 500;
-ind2 = 600;
-[h,figData] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2);
+ind1 = 650;
+ind2 = 750;
+[h,rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2);
+figData.rawWaves.lfpO = rawWaves.lfpO;
+figData.rawWaves.t = rawWaves.t;
 
 %Makes the cross corrolation plot %Need to update this
 %twCrossCorr(root)
-[ds] = twPlotPeakDiff(root.user_def.lfp_origData, root);
-%% SubPlotting
+%[ds] = twPlotPeakDiff(root.user_def.lfp_origData, root);
 
-%how to go about this, like the old analysis where we pass the data to it, or 
-%calculate the figures in the function...
+%% SubPlotting
+twCombineFigs(figData);
+
 
 
 

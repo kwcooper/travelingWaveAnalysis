@@ -43,6 +43,10 @@ s = ltr.FontSize;
 ltr.FontSize = 12;
 grid on
 
+%add specific folder to this
+%printFigure(gcf, [figData.savePath, '_',plotName,'.',figData.fig_type],'imgType',figData.fig_type);
+
+
 %Save and reorrient 
 CTA.avgThetaWave = avgThetaWave';
 CTA.lfp_ = lfp_;

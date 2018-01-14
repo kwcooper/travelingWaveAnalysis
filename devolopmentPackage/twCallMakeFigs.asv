@@ -73,24 +73,38 @@ if force
 end
 %% Plotting 
 figData = struct;
+figData.ratInfo.name = Rat;
+figData.ratInfo.session = Session;
+figData.ratInfo.recording = Recording;
+figData.ratInfo.chOrdTxt = chTxt;
+figData.ratInfo.ref = ref;
+
+figData.saveFig = 1;
+figData.figDir = 'twImgDir';
+figData.savePath = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave', figData.figDir);
+figData.fig_type = 'png'; % options = {'png','ps','pdf'}
+
+
 %Makes the average wave plot
 [h,CTA] = plotCycleTriggeredAvg(root);
-figData.CTA.lfp_
-figData.CTA.t
+figData.CTA.lfp_ = CTA.lfp_;
+figData.CTA.t = CTA.t;
 
 %offsets (needs work)
 %twPlotQuiver(root)
 
 % Raw LFP: Grabs the raw data from the specified indicies
-ind1 = 500;
-ind2 = 600;
+ind1 = 650;
+ind2 = 750;
 [h,rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2);
-figData.rawWaves.lfpO;
-figData.rawWaves.t;
+figData.rawWaves.lfpO = rawWaves.lfpO;
+figData.rawWaves.t = rawWaves.t;
 
 %Makes the cross corrolation plot %Need to update this
 %twCrossCorr(root)
-%[ds] = twPlotPeakDiff(root.user_def.lfp_origData, root);
+keyboard;
+[ds] = twPlotPeakDiff(root.user_def.lfp_origData, root);
+
 %% SubPlotting
 twCombineFigs(figData);
 

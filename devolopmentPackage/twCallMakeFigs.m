@@ -73,6 +73,18 @@ if force
 end
 %% Plotting 
 figData = struct;
+figData.ratInfo.name = Rat;
+figData.ratInfo.session = Session;
+figData.ratInfo.recording = Recording;
+figData.ratInfo.chOrdTxt = chTxt;
+figData.ratInfo.ref = ref;
+
+figData.saveFig = 1;
+figData.figDir = 'twImgDir';
+figData.savePath = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave', figData.figDir);
+figData.fig_type = 'png'; % options = {'png','ps','pdf'}
+
+
 %Makes the average wave plot
 [h,CTA] = plotCycleTriggeredAvg(root);
 figData.CTA.lfp_ = CTA.lfp_;
@@ -90,7 +102,8 @@ figData.rawWaves.t = rawWaves.t;
 
 %Makes the cross corrolation plot %Need to update this
 %twCrossCorr(root)
-%[ds] = twPlotPeakDiff(root.user_def.lfp_origData, root);
+keyboard;
+[ds] = twPlotPeakDiff(root.user_def.lfp_origData, root);
 
 %% SubPlotting
 twCombineFigs(figData);

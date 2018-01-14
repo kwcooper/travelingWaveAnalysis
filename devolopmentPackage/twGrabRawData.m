@@ -21,4 +21,8 @@ grid on
 rawWaves.lfpO = lfpO;
 rawWaves.t = t;
 
+%add specific folder to this
+%printFigure(gcf, [figData.savePath, '_',plotName,'.',figData.fig_type],'imgType',figData.fig_type);
+
+
 end

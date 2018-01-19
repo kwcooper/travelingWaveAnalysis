@@ -1,5 +1,5 @@
-function [ds] = twPlotPeakDiff(D, root)
-keyboard;
+function [ds] = twPlotPeakDiff(root)
+
 %need to filter and run through hilbert... 
 thetaPhase = root.user_def.theta_phs;
 
@@ -20,13 +20,17 @@ dataShift = cumsum([0 circDiff(dataShift',1, 'rad')]);
 x = 1:chan;
 B = regress(dataShift', [x' ones(size(x))']);
 
-%check result is reasonable.
+%check if result is reasonable.
 figure;
 plot(x,dataShift,'o');
 hold on;
 y = B(1)*x + B(2);
 plot(x,y);
+title(['peak offset | Slope: ' num2str(B(1))]);
 
+%add specific folder to this
+%printFigure(gcf, [figData.savePath,
+%'_',plotName,'.',figData.fig_type],'imgType',figData.fig_type);s
 
 
 end

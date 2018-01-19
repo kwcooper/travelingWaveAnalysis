@@ -22,7 +22,7 @@ sessions = {...
 'Roble',       'OpenFieldBigger_2017-12-19','2017-12-19_20-04-50',   'all',       [28 32 4 8 11 15 19 23 26 30 2 6 9 13 17 21],      16, [];... % 
 };
 iteration = 1;
-sess2run = [2 3 4 5];
+sess2run = [2 3 4];
 for i = sess2run %Select which sessions you would like to run
   
   sInd = i; % This selects the session you want to analyze TD: add user input
@@ -42,10 +42,10 @@ for i = sess2run %Select which sessions you would like to run
   fprintf(['__________________________________\n']);
   fprintf(['Running session ', num2str(iteration), ' of ', num2str(length(sess2run)), '...\n'])
   fprintf(['Rat: ', Rat, '  Recording: ', Recording, '\n']);
-  fprintf(['Working dir: ', workingDir(:,34:end), '\n']);
+  %fprintf(['Working dir: ', workingDir(:,34:end), '\n']);
   
   %Check if the data already exists
-  if ~force && exist('twPrepData.mat', 'file')
+  if ~force && exist(dataPath, 'file')
     fprintf('I found an existing root object, loading it in...\n');
     foundData = load('twPrepData.mat');
     

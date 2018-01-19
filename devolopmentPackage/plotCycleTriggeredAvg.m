@@ -1,4 +1,4 @@
-function [h,CTA] = plotCycleTriggeredAvg(root)
+function [h,CTA] = plotCycleTriggeredAvg(root, epochSize, figData, plot)
 
 %!! Figure out which channel to do the calculations on (Reference?)
 
@@ -9,7 +9,7 @@ cycles(badCycles) = [];
 
 cycleTs=root.b_ts(cycles); %finds all theta cycles
 % finds bad theta cycles
-epochSize = 0.100; %sets epoch size
+%epochSize = 0.100; %sets epoch size (moved to function argument)
 epochs = [cycleTs-epochSize cycleTs+epochSize]; % grabs epochs 
 root.epoch = epochs; 
 
@@ -43,9 +43,11 @@ s = ltr.FontSize;
 ltr.FontSize = 12;
 grid on
 
-%add specific folder to this
-%printFigure(gcf, [figData.savePath, '_',plotName,'.',figData.fig_type],'imgType',figData.fig_type);
-
+if plot
+  %add specific folder to this
+  plotName = figData.ratInfo.recording;
+  printFigure(gcf, [fullfile(figData.savePath, 'cycTrigAvg'), '_',plotName,'.',figData.fig_type],'imgType',figData.fig_type);
+end
 
 %Save and reorrient 
 CTA.avgThetaWave = avgThetaWave';

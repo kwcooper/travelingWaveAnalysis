@@ -1,0 +1,7 @@
+﻿Traveling Theta Waves in the Entorhinal Cortex of the Behaving Rat
+Keiland Cooper
+
+
+In the study of memory, major brain regions have been identified. Of these include the Hippocampus and Entorhinal cortex, each shown to be crucial to the process of long term
+episodic memory in past studies. The Hippocampus receives and sends neuronal projections 
+to and from the Entorhinal cortex. To investigate these brain structures further, implanted wires can record the neuronal electrical activity of these brain regions. This activity forms a wave pattern classified by the frequency of its oscillations, in our case the 4 - 8 hz range typically referred to as Theta. Recently, it was reported that these waves of neuronal activity propagate down the temporal-Septal poles of the Hippocampus, with a 180 degree offset between the peaks of the oscillation (Patel, 2012). These oscillations may functionally contribute to the Hippocampus's ability to switch between incoming streams of information as well as segregating the separate types of information that the dorsal and septal poles of the hippocampus are each responsible, with maximum integration n the medial region. In our research, we investigate whether these waves also exist in the afferent projections to the Hippocampus, in the Entorhinal cortex, with preliminary data suggesting that this is in fact the case. This could mean that the discovered traveling wave in the hippocampus may be a result of the properties of the Entorhinal cortex, and not an intrinsic occurrence.

@@ -1,4 +1,4 @@
-function [h,CTA] = plotCycleTriggeredAvg(root, epochSize, figData, plot)
+function [h,CTA] = plotCycleTriggeredAvg(root, epochSize, figData, plt)
 
 %!! Figure out which channel to do the calculations on (Reference?)
 
@@ -37,16 +37,16 @@ plot(t,lfp_,'k'); axis ij;
 
 xlabel('Time') %!! Is this correct? or should it be phase?
 ylabel('Channel') % !! What about the axis though...
-title('Averaged Waves')
-ltr = text(0.02,0.98,'C','Units', 'Normalized', 'VerticalAlignment', 'Top');
-s = ltr.FontSize;
-ltr.FontSize = 12;
+title(['Averaged Waves: ', figData.ratInfo.name])
+% ltr = text(0.02,0.98,'C','Units', 'Normalized', 'VerticalAlignment', 'Top');
+% s = ltr.FontSize;
+% ltr.FontSize = 12;
 grid on
 
-if plot
-  %add specific folder to this
-  plotName = figData.ratInfo.recording;
-  printFigure(gcf, [fullfile(figData.savePath, 'cycTrigAvg'), '_',plotName,'.',figData.fig_type],'imgType',figData.fig_type);
+if plt
+  plotName = [figData.ratInfo.recording '_' figData.ratInfo.name];
+  printFigure(gcf, [fullfile(figData.savePath, 'cycTrigAvg',[plotName,'.',figData.fig_type])],'imgType',figData.fig_type);
+  fprintf('Saved figure (CycTrig Avg)\n');
 end
 
 %Save and reorrient 

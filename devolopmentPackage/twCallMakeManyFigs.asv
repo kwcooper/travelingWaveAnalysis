@@ -65,7 +65,7 @@ for i = sess2run %Select which sessions you would like to run
     foundData = load(structName);
     
     % Check if the saved data is what we think it is
-    fprintf('Checking session names...');
+    fprintf('Checking session names...\n');
     if ~strcmp(foundData.Recording, sessions{sInd,3})
       warning('Imported data fields do not match requested session!\n')
       force = 1;
@@ -73,7 +73,6 @@ for i = sess2run %Select which sessions you would like to run
       % dont match.
       keyboard;
     else
-      fprintf('Checks out!\n');
       root = foundData.root; %set
     end
   end
@@ -131,7 +130,7 @@ for i = sess2run %Select which sessions you would like to run
 %   %Makes the cross corrolation plot %Need to update this
 %   %twCrossCorr(root)
 %   keyboard;
-%   pd = twPlotPeakDiff(root, figData, plt);
+%   [ds] = twPlotPeakDiff(root);
 
 iteration = iteration + 1;
 end

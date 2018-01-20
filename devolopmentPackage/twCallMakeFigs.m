@@ -5,7 +5,7 @@ fprintf('\nWelcome to the Travleing Wave Project''s Analysis Package!\n');
 %  Add raw lfp ends to the sessions structure
 
 clear all;
-sInd = 23; % This selects the session you want to analyze TD: add user input
+sInd = 9; % This selects the session you want to analyze TD: add user input
 force = 0; % forces a recalculation of the data 
 
 %% Contains ephys file information, as well as channel mappings, and good epoch data
@@ -52,21 +52,24 @@ dataPath = fullfile(ratLibPath,Rat,Session,Recording); cd(dataPath);
 %dataPath = 'C:\Users\DarthMaul\Downloads\2017-12-19_20-04-50\2017-12-19_20-04-50'; fprintf('USING TEMP ROBLE PATH - FIX ME!\n');
 
 %Check if the data already exists
-if ~force && exist(fullfile(dataPath, 'twPrepData.mat'), 'file')
+structName = [Session '_' Rat '_root.mat'];
+%Check if the data already exists
+if ~force && exist(fullfile(dataPath, structName), 'file')
   fprintf('I found an existing root object, loading it in...\n');
-  foundData = load('twPrepData.mat');
+  foundData = load(structName);
   
   % Check if the saved data is what we think it is
-  fprintf('Checking session names...\n');
-  if ~strcmp(foundData.Recording, sessions{sInd,3}) 
+  fprintf('Checking session names...');
+  if ~strcmp(foundData.Recording, sessions{sInd,3})
     warning('Imported data fields do not match requested session!\n')
     force = 1;
+    % TD add way to move into the forced data recalculation if fields
+    % dont match.
     keyboard;
   else
+    fprintf('Checks out!\n');
     root = foundData.root; %set
   end
-else
-  force = 1;
 end
 
 if force
@@ -80,7 +83,7 @@ if force
   fprintf('(Cutting out bad epochs and grabbing theta cycles)\n')
   root = twPrepData(D,fs,ref);
   
-  save('twPrepData.mat','root','Recording','-v7.3');
+  save(structName,'root','Recording','-v7.3');
   fprintf('Saving precomputed data (root) so next time is a breeze!\n');
 end
 
@@ -100,7 +103,7 @@ figData.ratInfo.recording = Recording;
 figData.ratInfo.chOrdTxt = chTxt;
 figData.ratInfo.ref = ref;
 
-plot = 1;
+plt = 1;
 
 figData.saveFig = 1;
 figData.figDir = 'twImgDir';
@@ -111,28 +114,24 @@ figData.fig_type = 'png'; % options = {'png','ps','pdf'}
 %Makes the average wave plot  b
 % td add argument for window width (two cycles)
 epochSize = 0.100;
-[h,CTA] = plotCycleTriggeredAvg(root, epochSize, figData, plot);
-figData.CTA.lfp_ = CTA.lfp_;
-figData.CTA.t = CTA.t;
 
-%offsets (needs work)
-%twPlotQuiver(root)
+[h,CTA] = plotCycleTriggeredAvg(root, epochSize, figData, plt);
+figData.CTA = CTA;
+
+%Makes the cross corrolation plot %Need to update this
+%twCrossCorr(root)
+pd = twPlotPeakDiff(root, figData, plt);
+figData.pd = pd;
 
 % Raw LFP: Grabs the raw data from the specified indicies
 % td Set these to the specified ends
 ind1 = 650;
 ind2 = 750;
 [h,rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2);
-figData.rawWaves.lfpO = rawWaves.lfpO;
-figData.rawWaves.t = rawWaves.t;
-
-%Makes the cross corrolation plot %Need to update this
-%twCrossCorr(root)
-keyboard;
-[ds] = twPlotPeakDiff(root);
-
+figData.rawWaves = rawWaves;
 %% SubPlotting
-twCombineFigs(figData);
+keyboard;
+twCombineFigs(figData, plt);
 
 
 

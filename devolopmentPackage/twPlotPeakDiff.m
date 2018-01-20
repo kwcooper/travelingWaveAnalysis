@@ -1,4 +1,4 @@
-function [ds] = twPlotPeakDiff(root)
+function pd = twPlotPeakDiff(root, figData, plt)
 
 %need to filter and run through hilbert... 
 thetaPhase = root.user_def.theta_phs;
@@ -26,11 +26,16 @@ plot(x,dataShift,'o');
 hold on;
 y = B(1)*x + B(2);
 plot(x,y);
-title(['peak offset | Slope: ' num2str(B(1))]);
+title([figData.ratInfo.name ' peak offset | Slope: ' num2str(B(1))]);
 
-%add specific folder to this
-%printFigure(gcf, [figData.savePath,
-%'_',plotName,'.',figData.fig_type],'imgType',figData.fig_type);s
+if plt
+  plotName = [figData.ratInfo.recording '_' figData.ratInfo.name];
+  printFigure(gcf, [fullfile(figData.savePath, 'peakDiff',[plotName,'.',figData.fig_type])],'imgType',figData.fig_type);
+  fprintf('Saved figure (peakDiff)\n');
+end
 
-
+pd.x = x;
+pd.dataShift = dataShift;
+pd.y = y;
+pd.B = B;
 end

@@ -6,7 +6,7 @@ fprintf('\nWelcome to the Travleing Wave Project''s Analysis Package!\n');
 
 clear all;
 sInd = 9; % This selects the session you want to analyze TD: add user input
-force = 1; % forces a recalculation of the data 
+force = 0; % forces a recalculation of the data 
 
 %% Contains ephys file information, as well as channel mappings, and good epoch data
 % Rat          Session                     Recording                notes        Channels                                     reference ends
@@ -112,31 +112,26 @@ figData.fig_type = 'png'; % options = {'png','ps','pdf'}
 
 
 %Makes the average wave plot  b
-% td add argument for window width (two cycles)
+% td add argument for window width (two cycles) 
 epochSize = 0.100;
 
 [h,CTA] = plotCycleTriggeredAvg(root, epochSize, figData, plt);
-figData.CTA.lfp_ = CTA.lfp_;
-figData.CTA.t = CTA.t;
+figData.CTA = CTA;
 
-%offsets (needs work)
-%twPlotQuiver(root)
+%Makes the cross corrolation plot %Need to update this
+%twCrossCorr(root)
+pd = twPlotPeakDiff(root, figData, plt);
+figData.pd = pd;
 
 % Raw LFP: Grabs the raw data from the specified indicies
 % td Set these to the specified ends
 ind1 = 650;
 ind2 = 750;
 [h,rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2);
-figData.rawWaves.lfpO = rawWaves.lfpO;
-figData.rawWaves.t = rawWaves.t;
-
-%Makes the cross corrolation plot %Need to update this
-%twCrossCorr(root)
-keyboard;
-[ds] = twPlotPeakDiff(root, figplt);
-
+figData.rawWaves = rawWaves;
 %% SubPlotting
-twCombineFigs(figData);
+keyboard;
+twCombineFigs(figData, plt);
 
 
 

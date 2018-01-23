@@ -2,6 +2,7 @@ fprintf('\nWelcome to the Travleing Wave Project''s Multi-Rat Analysis Package!\
 %To Do
 %  Think of how to save the data from all rats to one struct... 
 %      load it in from one location?
+%  FLip tio's channel map
 clear all;
 
 %% Contains ephys file information, as well as channel mappings, and good epoch data
@@ -38,7 +39,7 @@ sess2run = [2 5 9 11 23];
 for i = sess2run %Select which sessions you would like to run
   
   sInd = i; % This selects the session you want to analyze TD: add user input
-  force = 1; % maybe save the forcing to sessions?
+  force = 0; % maybe save the forcing to sessions?
   
   Rat =  sessions{sInd,1};
   Session =  sessions{sInd,2};
@@ -93,45 +94,51 @@ for i = sess2run %Select which sessions you would like to run
     fprintf('Saving precomputed data (root) so next time is a breeze!\n');
   end
   
-  %% Plotting
-  figData = struct;
-  figData.ratInfo.name = Rat;
-  figData.ratInfo.session = Session;
-  figData.ratInfo.recording = Recording;
-  figData.ratInfo.chOrdTxt = chTxt;
-  figData.ratInfo.ref = ref;
-  
-  plt = 1;
-  
-  figData.saveFig = 1;
-  figData.figDir = 'twImgDir';
-  figData.savePath = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave', figData.figDir);
-  figData.fig_type = 'png'; % options = {'png','ps','pdf'}
-  
-  
-  %Makes the average wave plot  b
-  % td add argument for window width (two cycles)
-  epochSize = 0.100;
-  
-  [h,CTA] = plotCycleTriggeredAvg(root, epochSize, figData, plt);
-%   figData.CTA.lfp_ = CTA.lfp_;
-%   figData.CTA.t = CTA.t;
-%   
-%   %offsets (needs work)
-%   %twPlotQuiver(root)
-%   
-%   % Raw LFP: Grabs the raw data from the specified indicies
-%   % td Set these to the specified ends
-%   ind1 = 650;
-%   ind2 = 750;
-%   [h,rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2);
-%   figData.rawWaves.lfpO = rawWaves.lfpO;
-%   figData.rawWaves.t = rawWaves.t;
-%   
-%   %Makes the cross corrolation plot %Need to update this
-%   %twCrossCorr(root)
-%   keyboard;
-%   pd = twPlotPeakDiff(root, figData, plt);
+%% Plotting
+figData = struct;
+figData.ratInfo.name = Rat;
+figData.ratInfo.session = Session;
+figData.ratInfo.recording = Recording;
+figData.ratInfo.chOrdTxt = chTxt;
+figData.ratInfo.ref = ref;
+
+plt = 1;
+
+figData.saveFig = 1;
+figData.figDir = 'twImgDir';
+figData.savePath = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave', figData.figDir);
+figData.fig_type = 'png'; % options = {'png','ps','pdf'}
+
+
+%Makes the average wave plot  b
+% td add argument for window width (two cycles)
+epochSize = 0.100;
+
+[h,CTA] = plotCycleTriggeredAvg(root, epochSize, figData, plt);
+figData.CTA = CTA;
+
+%Makes the cross corrolation plot %Need to update this
+%twCrossCorr(root)
+pd = twPlotPeakDiff(root, figData, plt);
+figData.pd = pd;
+
+% Raw LFP: Grabs the raw data from the specified indicies
+% td Set these to the specified ends
+ratRegressStruct = 'ratRegress.mat';
+structPath = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave', ratRegressStruct); 
+if ~exist(structPath)
+  fprintf('No regression structure found, creating one.\n');
+  ratRegress = struct;
+  save(ratRegressStruct,'ratRegress','-v7.3'); 
+else
+  foundStruct = load(structPath);
+  fprintf('loading in struct\n')
+end
+
+ind1 = 650;
+ind2 = 750;
+[h,rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2);
+figData.rawWaves = rawWaves;
 
 iteration = iteration + 1;
 end

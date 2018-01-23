@@ -112,7 +112,7 @@ figData.fig_type = 'png'; % options = {'png','ps','pdf'}
 
 
 %Makes the average wave plot  b
-% td add argument for window width (two cycles)
+% td add argument for window width (two cycles) 
 epochSize = 0.100;
 
 [h,CTA] = plotCycleTriggeredAvg(root, epochSize, figData, plt);

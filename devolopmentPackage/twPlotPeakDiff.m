@@ -27,6 +27,7 @@ hold on;
 y = B(1)*x + B(2);
 plot(x,y);
 title([figData.ratInfo.name ' peak offset | Slope: ' num2str(B(1))]);
+%Axis: circular difrence (phase offset) and channels
 
 if plt
   plotName = [figData.ratInfo.recording '_' figData.ratInfo.name];

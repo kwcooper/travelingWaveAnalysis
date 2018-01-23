@@ -1,4 +1,4 @@
-function root = twPrepData(D,fs,refCh)
+ function root = twPrepData(D,fs,refCh)
 %FUNCTION TWPREPDATA %cleans and extracts useful properties of the data
 %Part of the Traveling Wave Analysis package
 

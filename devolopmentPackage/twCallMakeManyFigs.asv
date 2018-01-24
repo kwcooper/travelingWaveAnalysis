@@ -2,6 +2,7 @@ fprintf('\nWelcome to the Travleing Wave Project''s Multi-Rat Analysis Package!\
 %To Do
 %  Think of how to save the data from all rats to one struct... 
 %      load it in from one location?
+%  FLip tio's channel map
 clear all;
 
 %% Contains ephys file information, as well as channel mappings, and good epoch data
@@ -108,33 +109,45 @@ figData.figDir = 'twImgDir';
 figData.savePath = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave', figData.figDir);
 figData.fig_type = 'png'; % options = {'png','ps','pdf'}
 
+%%
+ratRegressStruct = 'ratRegress.mat';
+structPath = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave', ratRegressStruct); 
+if ~exist(structPath, 'file')
+  fprintf('No regression structure found, creating one.\n');
+  ratRegress = struct;
+  save(structPath,'ratRegress','-v7.3'); 
+else
+  foundStruct = load(structPath);
+  fprintf('loading in struct\n');
+end
 
-%Makes the average wave plot  b
+% load the struct back in
+ratRegress = foundStruct.ratRegress;
+ratRegress.(Rat).session = Session;
+
+%%
+% Makes the average wave plot  b
 % td add argument for window width (two cycles)
 epochSize = 0.100;
 
 [h,CTA] = plotCycleTriggeredAvg(root, epochSize, figData, plt);
 figData.CTA = CTA;
 
-%Makes the cross corrolation plot %Need to update this
-%twCrossCorr(root)
+% Makes the cross corrolation plot %Need to update this
+% twCrossCorr(root)
 pd = twPlotPeakDiff(root, figData, plt);
 figData.pd = pd;
 
 % Raw LFP: Grabs the raw data from the specified indicies
 % td Set these to the specified ends
-ratRegressStruct = 'ratRegress.mat';
-structPath = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave', ratRegressStruct); 
-if ~exist(structPath)
-  fprintf('No regression structure found, creating one.\n');
-  ratRegress = struct;
-  save(ratRegressStruct,'ratRegress','-v7.3'); 
-end
+
 
 ind1 = 650;
 ind2 = 750;
 [h,rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2);
 figData.rawWaves = rawWaves;
 
+% save the struct
+save(structPath,'ratRegress','-v7.3'); 
 iteration = iteration + 1;
 end

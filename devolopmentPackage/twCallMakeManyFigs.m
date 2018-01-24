@@ -94,7 +94,7 @@ for i = sess2run %Select which sessions you would like to run
     fprintf('Saving precomputed data (root) so next time is a breeze!\n');
   end
   
-%% Plotting
+%% Prepping
 figData = struct;
 figData.ratInfo.name = Rat;
 figData.ratInfo.session = Session;
@@ -109,36 +109,46 @@ figData.figDir = 'twImgDir';
 figData.savePath = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave', figData.figDir);
 figData.fig_type = 'png'; % options = {'png','ps','pdf'}
 
+%Grab the intra rat struct
+ratRegressStruct = 'ratRegress.mat';
+structPath = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave', ratRegressStruct); 
+if ~exist(structPath, 'file')
+  fprintf('No regression structure found, creating one.\n');
+  ratRegress = struct;
+  save(structPath,'ratRegress','-v7.3'); 
+else
+  foundStruct = load(structPath);
+  fprintf('loading in struct\n');
+end
 
-%Makes the average wave plot  b
+% load the struct back in
+ratRegress = foundStruct.ratRegress;
+ratRegress.(Rat).info = figData.ratInfo;
+
+%% Plotting
+% Makes the average wave plot  b
 % td add argument for window width (two cycles)
 epochSize = 0.100;
 
 [h,CTA] = plotCycleTriggeredAvg(root, epochSize, figData, plt);
 figData.CTA = CTA;
 
-%Makes the cross corrolation plot %Need to update this
-%twCrossCorr(root)
+% Makes the cross corrolation plot %Need to update this
+% twCrossCorr(root)
 pd = twPlotPeakDiff(root, figData, plt);
 figData.pd = pd;
-
+ratRegress.(Rat).pd = figData.pd;
 % Raw LFP: Grabs the raw data from the specified indicies
 % td Set these to the specified ends
-ratRegressStruct = 'ratRegress.mat';
-structPath = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave', ratRegressStruct); 
-if ~exist(structPath)
-  fprintf('No regression structure found, creating one.\n');
-  ratRegress = struct;
-  save(ratRegressStruct,'ratRegress','-v7.3'); 
-else
-  foundStruct = load(structPath);
-  fprintf('loading in struct\n')
-end
+
 
 ind1 = 650;
 ind2 = 750;
 [h,rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2);
 figData.rawWaves = rawWaves;
 
+%%
+% save the struct
+save(structPath,'ratRegress','-v7.3'); 
 iteration = iteration + 1;
 end

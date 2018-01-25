@@ -1,4 +1,4 @@
-function [h,CTA] = plotCycleTriggeredAvg(root, epochSize, figData, plt)
+function [CTA] = plotCycleTriggeredAvg(root, epochSize, figData, plt)
 
 %!! Figure out which channel to do the calculations on (Reference?)
 
@@ -25,25 +25,28 @@ epchData = cellfun(@(c) c(1:epchLength,:),epchData,'uni',0);
 epchData = cat(3,epchData{:});
 avgThetaWave = mean(epchData,3);
 
-h = figure;
+
+
 [tPts,nElecs] = size(avgThetaWave);
 t = linspace(-epochSize,epochSize,epchLength);
 lfp_ = avgThetaWave' / (-1 * 2.5 * rms(avgThetaWave(:)));
 offsets = repmat([1:nElecs]',1,tPts);
 lfp_ = lfp_ + offsets;
 
-plot(t,lfp_,'k'); axis ij;
-%Change axis to reflect proper channels
-
-xlabel('Time') %!! Is this correct? or should it be phase?
-ylabel('Channel') % !! What about the axis though...
-title(['Averaged Waves: ', figData.ratInfo.name])
-% ltr = text(0.02,0.98,'C','Units', 'Normalized', 'VerticalAlignment', 'Top');
-% s = ltr.FontSize;
-% ltr.FontSize = 12;
-grid on
-
-if plt
+if plt % if breaks move h = figure back to top of chunck
+  h = figure;
+  plot(t,lfp_,'k'); axis ij;
+  %Change axis to reflect proper channels
+  
+  xlabel('Time') %!! Is this correct? or should it be phase?
+  ylabel('Channel') % !! What about the axis though...
+  title(['Averaged Waves: ', figData.ratInfo.name])
+  % ltr = text(0.02,0.98,'C','Units', 'Normalized', 'VerticalAlignment', 'Top');
+  % s = ltr.FontSize;
+  % ltr.FontSize = 12;
+  grid on
+  
+  
   plotName = [figData.ratInfo.recording '_' figData.ratInfo.name];
   printFigure(gcf, [fullfile(figData.savePath, 'cycTrigAvg',[plotName,'.',figData.fig_type])],'imgType',figData.fig_type);
   fprintf('Saved figure (CycTrig Avg)\n');

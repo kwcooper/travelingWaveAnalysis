@@ -32,8 +32,6 @@ grid on;
 
 subplot(2,2,4);
 
-
-
 if plt
   plotName = [figData.ratInfo.recording '_' figData.ratInfo.name];
   printFigure(gcf, [fullfile(figData.savePath, 'subPlots',[plotName,'.',figData.fig_type])],'imgType',figData.fig_type);

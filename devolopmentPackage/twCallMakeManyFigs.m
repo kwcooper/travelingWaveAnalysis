@@ -37,12 +37,12 @@ sessions = {...
 };
 
 iteration = 1;
-sess2run = [2 5 11 12 13 14 18 20]; %[2 5 11 12 13 14 18 20] best set without roble
+sess2run = [2 5 11 12 18 20]; %[2 5 11 12 13 14 18 20] best set without roble
 for i = sess2run %Select which sessions you would like to run
   
   sInd = i; % This selects the session you want to analyze TD: add user input
-  force = 1; % maybe save the forcing to sessions?
-  plt = 1; % would you like the code to generate figures?
+  force = 0; % maybe save the forcing to sessions?
+  plt = 0; % would you like the code to generate figures?
   
   Rat =  sessions{sInd,1};
   Session =  sessions{sInd,2};

@@ -13,20 +13,28 @@ function interRatExploration(ratRegress, plt)
 % cleaner way of doing it
 % Gather the slopes from all the rats
 % assumes that each rat has the same number of recordings
+clear namefieldsfields;
 namefields = fieldnames(ratRegress);
-slopes = nan(1, numel(namefields));
+%slopes = nan(1, numel(namefields));
 for i = 1:numel(namefields)
-  namefieldsfields(i,:) = fieldnames(ratRegress.(namefields{i}));
+  namefieldsfields(i,:) = fieldnames(ratRegress.(namefields{i}))';
+end
+
+for k = 1:numel(namefields)
+  for i = 1:size(namefieldsfields,2)
+      slopes(k,i) = ratRegress.(namefields{k}).(char(namefieldsfields(k,i))).pd.B(1);
+  end
 end
 
 
-slopes(1,i) = ratRegress.(namefields{i}).pd.B(1);
+%slopes(1,i) = ratRegress.(namefields{i}).pd.B(1); 
+slopesPrime = reshape(slopes, [1,numel(slopes)]);
 
-fprintf(['The mean of the slopes is: ', num2str(mean(slopes)), ' (n = ', num2str(numel(namefields)),')\n']);
+fprintf(['The mean of the slopes is: ', num2str(mean(slopesPrime)), ' (n = ', num2str(numel(namefields)),')\n']);
 
 if plt
-  histogram(slopes)
-  title(['Slope of wave offset, mean: ', num2str(mean(slopes)), ' (n = ', num2str(numel(namefields)),')']);
+  histogram(slopesPrime)
+  title(['Slope of wave offset, mean: ', num2str(mean(slopesPrime)), ' (n = ', num2str(numel(namefields)),')']);
 end
 
 end

@@ -35,8 +35,8 @@ if plt % if brk move y= to after hold
   fprintf('Saved figure (peakDiff)\n');
 end
 
-pd.x = x;
-pd.dataShift = dataShift;
-pd.y = y;
-pd.B = B;
+pd.x = x; % elecNum
+pd.dataShift = dataShift; %diffMat
+pd.y = y; % phaseOffset
+pd.B = B; % elecPhaseSlopeInt
 end

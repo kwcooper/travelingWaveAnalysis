@@ -15,7 +15,7 @@ epochs = [cycleTs-epochSize cycleTs+epochSize]; % grabs epochs
 root.epoch = epochs; 
 
 root.b_myvar = root.user_def.theta_amp'; % time across rows
-epchData = root.myvar;
+epchData = root.myvar; 
 
 % drop short epochs and trim long epochs until all are the same length
 nSamp = cellfun(@(c) length(c), epchData,'uni',1);

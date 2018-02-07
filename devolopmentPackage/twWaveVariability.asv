@@ -33,12 +33,10 @@ end
 % change orientation and convert to a mat
 indsMat = cell2mat(inds');
 
-%scaledI = (I-min(I(:))) ./ (max(I(:)-min(I(:))));
-
 
 % slope values are caluclated porportionate to the indx values
 % we can normalize them for consistancy
-%v = max(indsMat'); % Grabs max value for each row indsMat2 = indsMat ./ v';
+%v = max(indsMat'); % Grabs max value for each row
 v = max(indsMat); % Grabs max value for each column
 indsMat2 = indsMat ./ v;
 indsMat = indsMat2; %temp
@@ -53,14 +51,13 @@ if scan
   figure;
   fprintf('press enter to scan through data!\n');
   for i = 1:1000
-    hold off;
     %plot(indsMat(:,i),1:size(indsMat,1), 'o');
     p = polyfit(1:size(indsMat(:,i),1),indsMat(:,i)',1);
     pv = polyval(p,1:size(indsMat(:,i),1));
     plot(indsMat(:,i)', 1:size(indsMat(:,i)',2), 'o');
     
     hold on;
-    plot(pv', 1:size(indsMat(:,i),1));
+    plot(pv',1:size(indsMat(:,i),1));
     title(['set ', num2str(i), ' Slope: ', num2str(p(1))]);
     xlabel('channel'); ylabel('cycleInd');
     

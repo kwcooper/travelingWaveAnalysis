@@ -5,7 +5,7 @@ fprintf('\nWelcome to the Travleing Wave Project''s Analysis Package!\n');
 %  Add raw lfp ends to the sessions structure
 
 clear all;
-sInd = 9; % This selects the session you want to analyze TD: add user input
+sInd = 2; % This selects the session you want to analyze TD: add user input
 force = 0; % forces a recalculation of the data 
 
 %% Contains ephys file information, as well as channel mappings, and good epoch data
@@ -47,8 +47,8 @@ badEnds = sessions{sInd,7}; % !! could update this to good ends?
 
 %% Path, fetching, preprocessing
 fprintf(['Grabbing data for ', Rat, '. Recording # ', Recording, '\n']);
-
-dataPath = fullfile(ratLibPath,Rat,Session,Recording); cd(dataPath);
+rlb = fullfile(dropboxPath, 'ratsEphys');
+dataPath = fullfile(rlb,Rat,Session,Recording); cd(dataPath);
 %dataPath = 'C:\Users\DarthMaul\Downloads\2017-12-19_20-04-50\2017-12-19_20-04-50'; fprintf('USING TEMP ROBLE PATH - FIX ME!\n');
 
 %Check if the data already exists

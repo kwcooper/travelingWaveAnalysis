@@ -1,18 +1,22 @@
 
-function twWaveVariability(root, scan, plt)
+function twWaveVariability(root, CTA, scan, plt)
 
-% finds the corolation of each epoch theta wave to the average
-% need to make sure the average isn't skewed for plotting
-% need to adjust for the raw eeg
 
+origData = root.user_def.lfp_origData;
 epch = CTA.epDat;
 atw = CTA.avgThetaWave;
-origData = root.user_def.lfp_origData;
-cycles = root.user_def.cycles; % !/TD: Just the peaks? wb the troughs?
-scan = 0;
+%cycles = root.user_def.cycles; 
 
-%nnz(cycles) % counts number of nonzero elements
 
+thetaPhs = nan(size(origData));
+thetaAmp = nan(size(origData));
+cycles = nan(size(origData));
+
+% Let's grab the cycles and phase (root has one, but it used hilbert)
+for i = 1:size(origData,1)
+  thetaPhs(i,:) = extractThetaPhase(origData(i,:),root.user_def.lfp_fs,'waveform',[6 10]);
+  [cycles(i,:),~] = parseThetaCycles(thetaPhs(i,:),root.user_def.lfp_fs,[6 10],0); % resetPh to pi instead of 0 for peaks!
+end
 
 %cycles = cycles(1:4, :); % k- let's just look at the first 4 channels
 %cycles = cycles([3:5 7:8], :); % jesus's recomendations for romo
@@ -44,15 +48,16 @@ indsMat2 = indsMat ./ v;
 indsMat = indsMat2; %temp
 
 % now we can select which channels we want
-indsMat = indsMat([3:5 7:8], :); %as per jesus's recomendation
-
+goodChanRomo = [3:5 7:8];
+indsMat = indsMat(goodChanRomo, :); %as per jesus's recomendation
+indsMat = indsMat(:,1000:end);%the beginning is super messy... lets cut it out
 
 scan = 1;
 if scan
   % paruse the slopes
   figure;
   fprintf('press enter to scan through data!\n');
-  for i = 1:1000
+  for i = 1000:2000
     hold off;
     %plot(indsMat(:,i),1:size(indsMat,1), 'o');
     p = polyfit(1:size(indsMat(:,i),1),indsMat(:,i)',1);
@@ -62,12 +67,31 @@ if scan
     hold on;
     plot(pv', 1:size(indsMat(:,i),1));
     title(['set ', num2str(i), ' Slope: ', num2str(p(1))]);
-    xlabel('channel'); ylabel('cycleInd');
+    xlabel('cycInd'); ylabel('offset');
     
     
     pause;
   end
 end
+
+
+figure;
+subplot(5,5)
+  for i = 1:1000
+    if isequal(mod(i,100), 0)
+      %plot(indsMat(:,i),1:size(indsMat,1), 'o');
+      p = polyfit(1:size(indsMat(:,i),1),indsMat(:,i)',1);
+      pv = polyval(p,1:size(indsMat(:,i),1));
+      plot(indsMat(:,i)', 1:size(indsMat(:,i)',2), 'o');
+
+      hold on;
+      plot(pv', 1:size(indsMat(:,i),1));
+      title(['set ', num2str(i), ' Slope: ', num2str(p(1))]);
+      xlabel('channel'); ylabel('cycleInd');
+    end
+    pause;
+  end
+
 
 
 % find the slope for each column, store in slopeVals
@@ -81,39 +105,79 @@ end
 % hist(slopeVals)
 figure; % this function is better
 histogram(slopeVals)
-xlim([-0.001 0.015])
-title("Romo chan 1-4 (normalized)")
+%xlim([-0.001 0.015])
+title(["Romo chan ",num2str(goodChanRomo)," (normalized/messy data cut)"])
 xlabel('slope')
 ylabel('num cycles')
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% dev 
+% tstCyc = cycles(1,:);
+% inds = find(tstCyc);
+% 
+% % finds the size of each interval
+% minusVals = [];
+% for i = 1:size(inds,2)-1
+%   minusVals(:, i) = (inds(i+1) - inds(i));
+% end
+% epochMean = ceil(mean(minusVals));
+% epochS = floor(size(tstCyc, 2) / epochMean);
+% %trim data so it fits the reshape
+% trim = epochMean * epochS;
+% tstCyc = cycles(1,1:trim);
+% ttcc = reshape(tstCyc, [epochS, epochMean]);
+% ttcc = ttcc';
 % old ramblings
 
 
-%td: combine these
-% Lets you scroll through the data to see what it looks like.
-figure;
-fprintf('press enter to scan through data!\n');
-for i = 1:100
-  hold off;
-  plot(indsMat(:,i),1:8, 'o');
-  title(num2str(i));
-  pause;
-end
-
-% plot the first set of points with the fitted slope
-figure;
-i = 1;
-p = polyfit(1:size(indsMat(:,i), 1),indsMat(:,i)',1);
-pv = polyval(p,1:size(indsMat(:,i), 1));
-plot(1:size(indsMat(:,i), 1),indsMat(:,i)', 'o');
-title(['slope', num2str(p(1))]);
-hold on;
-plot(1:size(indsMat(:,i), 1),pv);
-
-
-
+% %td: combine these
+% % Lets you scroll through the data to see what it looks like.
+% figure;
+% fprintf('press enter to scan through data!\n');
+% for i = 1:100
+%   hold off;
+%   plot(indsMat(:,i),1:8, 'o');
+%   title(num2str(i));
+%   pause;
+% end
+% 
+% % plot the first set of points with the fitted slope
+% figure;
+% i = 1;
+% p = polyfit(1:size(indsMat(:,i), 1),indsMat(:,i)',1);
+% pv = polyval(p,1:size(indsMat(:,i), 1));
+% plot(1:size(indsMat(:,i), 1),indsMat(:,i)', 'o');
+% title(['slope', num2str(p(1))]);
+% hold on;
+% plot(1:size(indsMat(:,i), 1),pv);
+% 
+% 
+% 
 
 
 
@@ -121,6 +185,7 @@ plot(1:size(indsMat(:,i), 1),pv);
 % View the phase offset per cycle
 %plot(cycles(4:8,1:500)')
 
+%nnz(cycles) % counts number of nonzero elements
 
 % l = [1:4; fliplr(1:4); 3:6]
 % k = [3 2];

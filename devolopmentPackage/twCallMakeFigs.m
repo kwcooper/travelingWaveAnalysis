@@ -115,7 +115,7 @@ figData.fig_type = 'png'; % options = {'png','ps','pdf'}
 % td add argument for window width (two cycles) 
 epochSize = 0.100;
 
-[h,CTA] = plotCycleTriggeredAvg(root, epochSize, figData, plt);
+[CTA] = plotCycleTriggeredAvg(root, epochSize, figData, plt);
 figData.CTA = CTA;
 
 %Makes the cross corrolation plot %Need to update this

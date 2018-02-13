@@ -19,7 +19,7 @@ end
 
 % clean data and filter to epochs of good theta
 %filtType = 'thetaDeltaRatio'; filtParams = 2; % works okay, some fine tuning may help further rule out low theta epochs and include 
-filtType = 'thetaMag'; filtParams = [115 1000]; % works okay, some fine tuning may help further rule out low theta epochs and include 
+filtType = 'thetaMag'; filtParams = [115 1000]  ; % works okay, some fine tuning may help further rule out low theta epochs and include 
 [pctDataUsed,inds2cut] = cleanData_Intan(D(refCh,:),fs,filtType,filtParams); 
 root.user_def.cleanData_inds2cut = inds2cut;
 root.user_def.cleanData_pctDataUsed = pctDataUsed;

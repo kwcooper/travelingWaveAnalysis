@@ -1,8 +1,8 @@
 
-function twWaveVariability(root, CTA, scan, plt)
+function twWaveVariability(root, CTA, name, scan, plt)
 
-
-origData = root.user_def.lfp_origData;
+name = Rat;
+origData = root.user_def.lfp_origData; %remember to cut out the bad data!
 epch = CTA.epDat;
 atw = CTA.avgThetaWave;
 %cycles = root.user_def.cycles; 
@@ -11,6 +11,12 @@ atw = CTA.avgThetaWave;
 thetaPhs = nan(size(origData));
 thetaAmp = nan(size(origData));
 cycles = nan(size(origData));
+
+%look at the cycles and the orgional data
+figure; plot(origData(:,1:3000)');
+hold on; plot(1000*cycles(:,1:3000)');
+
+
 
 % Let's grab the cycles and phase (root has one, but it used hilbert)
 for i = 1:size(origData,1)
@@ -69,12 +75,11 @@ if scan
     title(['set ', num2str(i), ' Slope: ', num2str(p(1))]);
     xlabel('cycInd'); ylabel('offset');
     
-    
     pause;
   end
 end
 
-
+% need's work
 figure;
 subplot(5,5)
   for i = 1:1000
@@ -92,8 +97,6 @@ subplot(5,5)
     pause;
   end
 
-
-
 % find the slope for each column, store in slopeVals
 slopeVals= nan(1, size(indsMat, 2));
 for i = 1:size(indsMat, 2)
@@ -106,7 +109,7 @@ end
 figure; % this function is better
 histogram(slopeVals)
 %xlim([-0.001 0.015])
-title(["Romo chan ",num2str(goodChanRomo)," (normalized/messy data cut)"])
+title([name," chan ",num2str(goodChanRomo),"(normalized/messy data cut)"])
 xlabel('slope')
 ylabel('num cycles')
 

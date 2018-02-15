@@ -101,7 +101,7 @@ subplot(5,5)
 slopeVals= nan(1, size(indsMat, 2));
 for i = 1:size(indsMat, 2)
   p = polyfit(1:size(indsMat(:,i), 1),indsMat(:,i)',1);
-  slopeVals(1, i) = p(1);
+  slopeVals(1, i) = p(1); 
 end
 
 % figure;

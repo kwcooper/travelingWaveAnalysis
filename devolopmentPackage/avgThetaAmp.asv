@@ -1,4 +1,4 @@
-function avgThetaAmp(root, epochSize, plt)
+  m  function avgThetaAmp(root, epochSize, plt)
 
 %plot(root.user_def.theta_amp);
 epochSize = 0.100;
@@ -15,7 +15,7 @@ epochs = [cycleTs-epochSize cycleTs+epochSize]; % grabs epochs
 root.epoch = epochs; 
 
 root.b_myvar = root.user_def.theta_amp'; % time across rows
-epchData = root.myvar;
+epchData = root.myvar; 
 
 % drop short epochs and trim long epochs until all are the same length
 nSamp = cellfun(@(c) length(c), epchData,'uni',1);
@@ -30,7 +30,7 @@ avgThetaAmp = mean(epchData,3);
 [tPts,nElecs] = size(avgThetaAmp);
 t = linspace(-epochSize,epochSize,epchLength);
 %lfp_ = avgThetaAmp' / (-1 * 2.5 * rms(avgThetaAmp(:)));
-lfp_ = avgThetaAmp / max(avgThetaAmp)
+lfp_ = avgThetaAmp';
 offsets = repmat([1:nElecs]',1,tPts);
 lfp_ = lfp_ + offsets;
 
@@ -39,11 +39,10 @@ h = figure;
 plot(t,lfp_,'k'); axis ij;
 %Change axis to reflect proper channels
 
-xlabel('Time') %!! Is this correct? or should it be phase?
-ylabel('Channel') % !! What about the axis though...
-title(['Averaged Waves: ', figData.ratInfo.name])
-% ltr = text(0.02,0.98,'C','Units', 'Normalized', 'VerticalAlignment', 'Top');
-% s = ltr.FontSize;
-% ltr.FontSize = 12;
+
+
+atw = CTA.avgThetaWave;
+
+
 grid on
 end

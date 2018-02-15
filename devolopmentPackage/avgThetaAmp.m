@@ -1,4 +1,4 @@
-function avgThetaAmp(root, epochSize, plt)
+  m   function avgThetaAmp(root, epochSize, plt)
 
 %plot(root.user_def.theta_amp);
 epochSize = 0.100;

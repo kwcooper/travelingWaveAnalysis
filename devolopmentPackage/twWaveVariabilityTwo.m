@@ -1,4 +1,4 @@
-
+%%
 %remember to cut out the bad data!
 
 
@@ -12,7 +12,6 @@ atw = CTA.avgThetaWave;
 thetaPhs = nan(size(origData));
 thetaAmp = nan(size(origData));
 cycles = nan(size(origData));
-
 
 
 % Let's grab the cycles and phase (root has one, but it used hilbert)
@@ -31,6 +30,7 @@ badCycles = root.user_def.cleanData_inds2cut(cycleInds);
 cycleInds(badCycles) = []; 
 fprintf(['Cleaned ', num2str(cyclesSize-size(cycleInds,2)), ' data points.\n'])
 
+%%
 % now let's epoch the cycles, according to cycles!
 epochSize = 0.100; 
 cycleTs = root.b_ts(cycleInds); %finds all theta cycles
@@ -48,21 +48,72 @@ cyclesEpoched(shortEpochs) = []; % drop short epochs
 
 % Resize cells
 for i = 1:size(cyclesEpoched, 1)
-  cyclesEpoched{i} = cyclesEpoched{i}(1:minSize, size(cyclesEpoched{i}, 2));
+  cyclesEpoched{i} = cyclesEpoched{i}(1:minSize, 1:size(cyclesEpoched{i}, 2));
 end
 %nSamp = cellfun(@(c) length(c), epchData,'uni',1); %for testing
 
+cyclesCycles = cell2mat(cyclesEpoched);
 
-
-
-%%%%% find out where the other channels are?!
-
+% let's see what the data looks like
 figure; 
 for i = 1:size(cyclesEpoched, 1)
   hold off;
-  plot(size(cyclesEpoched{i}))
+  plot(cyclesEpoched{i})
+  pause;
 end
 
+% alt: we could also check for epochs with only 4 peaks
+%     sum(cyclesEpoched{i}, _) > 2 % or check other demintion also for > 4  
+
+% Now let's grab the inds of each peak
+dropCount = 0;
+for i = 1:size(cyclesEpoched, 1)
+  for j = 1:size(cyclesEpoched{i}, 2)
+    ind = find(cyclesEpoched{i}(:,j));
+    % (!) if two inds found then keep the one closest to the
+    % midpoint of the epoch
+    if size(ind, 1) > 1
+      [meanDiff, k] = min(abs(ind-(size(cyclesEpoched{i}, 1)/2)));
+      ind = ind(k);
+      dropCount += 1
+    end
+    cyclesEpochedInds{i}(j,:) = ind;
+  end
+end
+fprintf(['Dropped ', num2str(dropCount), ' peaks'])
+
+
+
+%let's find the mean ind for all cycles per epoch
+for i = 1:size(cyclesEpochedInds, 2)
+  meanCycleInd(i, :) = mean(cyclesEpochedInds{i});
+end
+
+% handle the case where there arn't cycles... (nan)
+if find(isnan(meanCycleInd))
+  meanCycleInd(isnan(meanCycleInd)) = 0;
+end
+
+% curious what the mean data looks like?
+figure; plot(meanCycleInd')
+title(['Mean Indicies of Cycles'])
+ylabel('Mean'); xlabel('epochs')
+
+% 
+% for i = 1:size(cyclesEpoched, 1)
+%   for j = 1:size(cyclesEpoched{i},2)
+%      chanInd = find(cyclesEpoched{i}(:, j));
+%      % if more than one value, choose the one closest to the inds mean
+%      if size(chanInd, 1) > 1
+%        [c, index] = min(abs(chanInd-mean(meanCycleInd)));
+%        chanInd = chanInd;
+%      cyclesEpochedIndPC{i}(1,j) = chanInd;
+%   end
+%  end
+
+% let's only look at the good ones
+
+%
 
 
 
@@ -77,7 +128,10 @@ end
 
 
 
-cyclesCycles = cell2mat(cyclesEpoched);
+
+
+
+
 
 
 scan = 1;

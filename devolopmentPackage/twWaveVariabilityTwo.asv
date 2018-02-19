@@ -48,19 +48,48 @@ cyclesEpoched(shortEpochs) = []; % drop short epochs
 
 % Resize cells
 for i = 1:size(cyclesEpoched, 1)
-  cyclesEpoched{i} = cyclesEpoched{i}(1:minSize, size(cyclesEpoched{i}, 2));
+  cyclesEpoched{i} = cyclesEpoched{i}(1:minSize, 1:size(cyclesEpoched{i}, 2));
 end
 %nSamp = cellfun(@(c) length(c), epchData,'uni',1); %for testing
 
+cyclesCycles = cell2mat(cyclesEpoched);
 
-
-
+% let's see what the data looks like
+figure; 
 for i = 1:size(cyclesEpoched, 1)
-  figure;
+  hold off;
   plot(cyclesEpoched{i})
-  
+  pause;
 end
 
+% Now let's grab the indicies of each peak
+for i = 1:size(cyclesEpoched, 1)
+  cyclesEpochedInds{i} = find(cyclesEpoched{i}); 
+end
+
+%let's find the mean indicy for all cycles per epoch
+for i = 1:size(cyclesEpochedInds, 2)
+  meanCycleInd(i, :) = mean(cyclesEpochedInds{i});
+end
+
+figure; plot(meanCycleInd')
+title(['Mean Indicies of Cycles'])
+ylabel('Mean'); xlabel('epochs')
+
+for i = 1:size(cyclesEpoched, 1)
+  for j = 1:size(cyclesEpoched{i},2)
+     chanInd = find(cyclesEpoched{i}(:, j));
+     % need to think this threshold through
+     if size(chanInd, 1) > 1:
+       [c, index] = min(abs(chan-V(1)));
+       chanInd = chanInd;
+     cyclesEpochedIndPC{i}(1,j) = chanInd;
+  end
+  end
+
+% let's only look at the good ones
+
+%
 
 
 
@@ -75,7 +104,10 @@ end
 
 
 
-cyclesCycles = cell2mat(cyclesEpoched);
+
+
+
+
 
 
 scan = 1;

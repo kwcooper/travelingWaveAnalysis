@@ -1,6 +1,4 @@
 %%
-%remember to cut out the bad data!
-
 
 % lets set some defaults and allocate mats
 name = Rat;
@@ -21,14 +19,16 @@ for i = 1:size(origData,1)
 end 
 
 %take a look at the cycles and the orgional data
-figure; plot(origData(:,1:3000)');
-hold on; plot(1000*cycles(:,1:3000)');
+if 0
+  figure; plot(origData(:,1:3000)');
+  hold on; plot(1000*cycles(:,1:3000)');
+end
 
 % Let's clean up cycles a bit to remove the bad data
 cycleInds = find(root.user_def.cycles(1,:)); cyclesSize = size(cycles,2);
 badCycles = root.user_def.cleanData_inds2cut(cycleInds);
 cycleInds(badCycles) = []; 
-fprintf(['Cleaned ', num2str(cyclesSize-size(cycleInds,2)), ' data points.\n'])
+fprintf(['Cleaned ', num2str(cyclesSize-size(cycleInds,2)), ' data points. (booted bad data)\n'])
 
 %%
 % now let's epoch the cycles, according to cycles!
@@ -55,11 +55,14 @@ end
 cyclesCycles = cell2mat(cyclesEpoched);
 
 % let's see what the data looks like
-figure; 
-for i = 1:size(cyclesEpoched, 1)
-  hold off;
-  plot(cyclesEpoched{i})
-  pause;
+if 0
+  fprintf('Press enter to see the next slide,\n press ctrl + C when finished!')
+  figure;
+  for i = 1:size(cyclesEpoched, 1)
+    hold off;
+    plot(cyclesEpoched{i})
+    pause;
+  end
 end
 
 % alt: we could also check for epochs with only 4 peaks
@@ -67,37 +70,79 @@ end
 
 % Now let's grab the inds of each peak
 dropCount = 0;
+nanCount = 0;
 for i = 1:size(cyclesEpoched, 1)
   for j = 1:size(cyclesEpoched{i}, 2)
     ind = find(cyclesEpoched{i}(:,j));
-    % (!) if two inds found then keep the one closest to the
-    % midpoint of the epoch
+    % (!) if two inds found then keep the one closest 
+    % to the midpoint of the epoch
     if size(ind, 1) > 1
       [meanDiff, k] = min(abs(ind-(size(cyclesEpoched{i}, 1)/2)));
       ind = ind(k);
-      dropCount += 1
+      dropCount = dropCount + 1;
+    end
+    % handle if there arn't any peaks
+    if isempty(ind)
+      ind = nan;
+      nanCount = nanCount + 1;
     end
     cyclesEpochedInds{i}(j,:) = ind;
   end
 end
-fprintf(['Dropped ', num2str(dropCount), ' peaks'])
+fprintf(['Dropped ', num2str(dropCount), ' peaks. (cycles with multiple peaks)\n'])
+fprintf(['Also, there are ', num2str(nanCount), ' nan''s. (cycles without peaks)\n'])
 
-
-
+%%
 %let's find the mean ind for all cycles per epoch
 for i = 1:size(cyclesEpochedInds, 2)
   meanCycleInd(i, :) = mean(cyclesEpochedInds{i});
 end
 
-% handle the case where there arn't cycles... (nan)
+% (!) handle the case where there arn't cycles... (nan)
 if find(isnan(meanCycleInd))
   meanCycleInd(isnan(meanCycleInd)) = 0;
-end
+end 
 
 % curious what the mean data looks like?
-figure; plot(meanCycleInd')
-title(['Mean Indicies of Cycles'])
-ylabel('Mean'); xlabel('epochs')
+if 0
+  figure; plot(meanCycleInd')
+  title(['Mean Indicies of Cycles'])
+  ylabel('Mean'); xlabel('epochs')
+end
+
+% let's fit some points!
+for i = 1:size(cyclesEpochedInds, 2)
+  p = polyfit(1:size(cyclesEpochedInds{i}, 1),cyclesEpochedInds{i}',1);
+  cyclesEpochedSlopes(i, 1) = p(1); 
+end
+
+% let's look a time series of slopes
+figure; plot(cyclesEpochedSlopes)
+% and now a histogram
+figure; histogram(cyclesEpochedSlopes)
+
+% find the number of peaks counted for analysis quality control
+for i = 1:size(cyclesEpochedInds, 2)
+  numPeaks(i, 1) = size(cyclesEpochedInds{i},1);
+end
+fprintf(['The average number of peaks is ', num2str(mean(numPeaks)), '.\n'])
+
+
+
+
+
+
+
+
+
+%           | Code Graveyard |
+% -=-=-=-=-=-=-=-= RIP =-=-=-=-=-=-=-=-=-
+
+% slopeVals= nan(1, size(indsMat, 2));
+% for i = 1:size(indsMat, 2)
+%   p = polyfit(1:size(indsMat(:,i), 1),indsMat(:,i)',1);
+%   slopeVals(1, i) = p(1); 
+% end
 
 % 
 % for i = 1:size(cyclesEpoched, 1)
@@ -120,55 +165,41 @@ ylabel('Mean'); xlabel('epochs')
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-scan = 1;
-if scan
-  for j = 1:size(cyclesEpoched,3)
-    for i = 1:size(cyclesEpoched,2)
-  hold off;
-  figure; hold on; plot(cyclesEpoched(:,:,j)); %plot(1:100,100 * cycles(:,i,j), 'k');
-    end
-  end
-end
-
-
-
-
-epchData = root.user_def.thetaEpoch; % calculated from the plotCycleTriggered average code
-
-
-for j = 1:size(epchData,3)
-  for i = 1:size(epchData,2)
-  thetaPhs(:,i,j) = extractThetaPhase(epchData(:,i,j),root.user_def.lfp_fs,'waveform',[6 10]);
-  [cycles(:,i,j),~] = parseThetaCycles(thetaPhs(:,i,j),root.user_def.lfp_fs,[6 10],0); % resetPh to pi instead of 0 for peaks!
-  end
-end
-
-scan = 1;
-if scan
-  for j = 1:size(epchData,3)
-    for i = 1:size(epchData,2)
-  hold off;
-  figure; hold on; plot(epchData(:,:,j)); plot(1:100,100 * cycles(:,i,j), 'k');
-    end
-  end
-end
-
-
-
+% scan = 1;
+% if scan
+%   for j = 1:size(cyclesEpoched,3)
+%     for i = 1:size(cyclesEpoched,2)
+%   hold off;
+%   figure; hold on; plot(cyclesEpoched(:,:,j)); %plot(1:100,100 * cycles(:,i,j), 'k');
+%     end
+%   end
+% end
+% 
+% 
+% 
+% 
+% epchData = root.user_def.thetaEpoch; % calculated from the plotCycleTriggered average code
+% 
+% 
+% for j = 1:size(epchData,3)
+%   for i = 1:size(epchData,2)
+%   thetaPhs(:,i,j) = extractThetaPhase(epchData(:,i,j),root.user_def.lfp_fs,'waveform',[6 10]);
+%   [cycles(:,i,j),~] = parseThetaCycles(thetaPhs(:,i,j),root.user_def.lfp_fs,[6 10],0); % resetPh to pi instead of 0 for peaks!
+%   end
+% end
+% 
+% scan = 1;
+% if scan
+%   for j = 1:size(epchData,3)
+%     for i = 1:size(epchData,2)
+%   hold off;
+%   figure; hold on; plot(epchData(:,:,j)); plot(1:100,100 * cycles(:,i,j), 'k');
+%     end
+%   end
+% end
+% 
+% 
+% 
 
 
 

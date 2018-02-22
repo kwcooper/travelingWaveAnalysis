@@ -5,8 +5,8 @@ fprintf('\nWelcome to the Travleing Wave Project''s Analysis Package!\n');
 %  Add raw lfp ends to the sessions structure
 
 clear all;
-sInd = 2; % This selects the session you want to analyze TD: add user input
-force = 0; % forces a recalculation of the data 
+sInd = 25; % This selects the session you want to analyze TD: add user input
+force = 1; % forces a recalculation of the data 
 
 %% Contains ephys file information, as well as channel mappings, and good epoch data
 % Rat          Session                     Recording                notes        Channels                                     reference ends
@@ -35,6 +35,7 @@ sessions = {...
 'Roble',       'OpenFieldBigger_2017-12-19','2017-12-19_20-04-50',   'all',       [28 32 4 8 11 15 19 23 26 30 2 6 9 13 17 21],      16, [650 750];...  
 'Roble',       'OpenFieldBigger_2017-12-19','2017-12-19_20-04-50',   'sml',       [28 32 4 8 11 15 19 23],                           1,  [650 750];...
 'Roble',       'OpenFieldBigger_2017-12-19','2017-12-20_17-31-46',   'all',       [28 32 4 8 11 15 19 23 26 30 2 6 9 13 17 21],      16, [650 750];... %24
+'Romo',        'CircleTrack_2017-11-27',    '2017-11-27_12-44-08',   'goodCh',    [57 61 47 38 33],                                   1, [];...
 };
 
 Rat =  sessions{sInd,1};
@@ -47,6 +48,7 @@ badEnds = sessions{sInd,7}; % !! could update this to good ends?
 
 %% Path, fetching, preprocessing
 fprintf(['Grabbing data for ', Rat, '. Recording # ', Recording, '\n']);
+chSfprintf(['Channels: ',(2:end-1),'\n']);
 rlb = fullfile(dropboxPath, 'ratsEphys');
 dataPath = fullfile(rlb,Rat,Session,Recording); cd(dataPath);
 %dataPath = 'C:\Users\DarthMaul\Downloads\2017-12-19_20-04-50\2017-12-19_20-04-50'; fprintf('USING TEMP ROBLE PATH - FIX ME!\n');
@@ -127,11 +129,11 @@ figData.pd = pd;
 % td Set these to the specified ends
 ind1 = 650;
 ind2 = 750;
-[h,rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2);
+[rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2, 0 );
 figData.rawWaves = rawWaves;
 %% SubPlotting
-keyboard;
-twCombineFigs(figData, plt);
+pause;
+%twCombineFigs(figData, plt);
 
 
 

@@ -132,7 +132,7 @@ ind2 = 750;
 [rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2, 0 );
 figData.rawWaves = rawWaves;
 %% SubPlotting
-pause;
+%pause;
 %twCombineFigs(figData, plt);
 
 

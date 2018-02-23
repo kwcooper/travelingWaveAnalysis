@@ -1,0 +1,9 @@
+function [lfp_,split] = spreadLFP(lfp,split)
+if ~exist('split','var') || isempty(split)
+  split = 2.5 * rms(double(lfp(:)));
+end
+
+[nElecs,tPts,nSets] = size(lfp);
+lfp_ = lfp/split;
+offsets = repmat([1:nElecs]',1,tPts,nSets);
+lfp_ = lfp_ + offsets;

@@ -1,11 +1,11 @@
 %%
-
+% Requires: Root Object
 
 % td: simulated data
-%Rat = 'Romo';
+Rat = 'Test';
 
 % lets set some defaults and allocate mats
-name = Rat;
+name = Rat; 
 origData = root.user_def.lfp_origData; 
 epch = CTA.epDat;
 atw = CTA.avgThetaWave;
@@ -30,7 +30,7 @@ if 0
 end
 
 % Let's clean up cycles a bit to remove the bad data
-%cycleInds = find(root.user_def.cycles(1,:)); cyclesSize = size(cycles,2); % ELN COMMENTED OUT
+%cycleInds = find(root.user_def.cycles(1,:)); cyclesSize = size(cycles,2); % Legacy code
 cycleInds = find(cycles(1,:)); cyclesSize = size(cycles,2);
 badCycles = root.user_def.cleanData_inds2cut(cycleInds);
 cycleInds(badCycles) = []; 
@@ -73,8 +73,34 @@ if 0
   end
 end
 
-% alt: we could also check for epochs with only 4 peaks
-%     sum(cyclesEpoched{i}, _) > 2 % or check other demintion also for > 4  
+% alt: we could check for epochs with only 4 peaks
+%     sum(cyclesEpoched{i}, _) > 2 % or check other demention also for > 4  
+
+
+
+cellSize = size(cyclesEpoched, 1);
+numChan = size(cyclesEpoched{1}, 2);
+testData = cell(cellSize, 1);
+per = 0;
+for i = 1:cellSize
+  z = zeros(100,numChan);
+  % Make perfect dataset
+  if per
+    nds(1,1) = 48;
+    for j = 2:numChan;nds(1,j) = nds(1,j-1) + 101; end
+    z(nds) = 1;
+  % Make noisy dataset
+  else 
+    for j = 1:numChan
+      ndI = random('Normal',48 + j,.5,1,1);
+      z(round(ndI),j) = 1;
+    end
+  end
+  testData{i} = z;
+end
+ 
+
+cyclesEpoched = testData;
 
 % Now let's grab the inds of each peak
 dropCount = 0;
@@ -219,6 +245,7 @@ for i = startInd:size(cyclesEpochedInds,2)
 end
 
 % Scan V2.0 ELN 220218
+% Pass through root to epoch
   root.b_myvar = origData'; epchLFP = root.myvar;
   root.b_myvar = thetaPhs'; epchThP = root.myvar;
   root.b_myvar = cycles';   epchCyc = root.myvar;
@@ -227,17 +254,18 @@ for i = startInd:size(cyclesEpochedInds,2)
   cyclesEpochedTs = cyclesEpochedInds{i}; nChan = size(cyclesEpochedTs, 1);
   p = polyfit(1:nChan,cyclesEpochedTs',1);
   pv = polyval(p, 1:nChan);
-  
   [b,stats] = robustfit(1:nChan,cyclesEpochedTs);
   b = fliplr(b');
   bv = polyval(b, 1:nChan);
+  
+  %plot the raw data
   tmpLFP = spreadLFP(epchLFP{i}')';
   hold off; plot(tmpLFP,'k');
   
-  hold on; 
+  %plot the inds of each waveform
   offsets = [0:nChan-1]*size(tmpLFP,1);
   tmpX = repmat(cyclesEpochedTs',2,1); tmpY = [1:nChan;tmpLFP(cyclesEpochedTs+offsets')'];
-  plot(tmpX, tmpY, 'k:');
+  hold on; plot(tmpX, tmpY, 'k:');
   plot(cyclesEpochedTs', 1:nChan, 'o');
   %plot(spreadLFP(epchThP{i}',8)','c');
   %plot(spreadLFP(epchCyc{i}',2)','m:');
@@ -252,18 +280,39 @@ for i = startInd:size(cyclesEpochedInds,2)
   pause;
 end
 
-
+% Check how the tweedledorph looks over the raw data (Theta/data)
 figure; plot(origData(1,1:1000)/500); hold on; plot(thetaPhs(1,1:1000))
 
+%%
+% Make simulated data: cyclesEpoched
+cellSize = size(cyclesEpoched, 1);
+numChan = size(cyclesEpoched{1}, 2);
+testData = cell(cellSize, 1);
+per = 0;
+for i = 1:cellSize
+  z = zeros(100,numChan);
+  % Make perfect dataset
+  if per
+    nds(1,1) = 48;
+    for j = 2:numChan;nds(1,j) = nds(1,j-1) + 101; end
+    z(nds) = 1;
+  % Make noisy dataset
+  else 
+    for j = 1:numChan
+      ndI = random('Normal',48 + j,.5,1,1);
+      z(round(ndI),j) = 1;
+    end
+  end
+  testData{i} = z;
+end
+ 
 
-
-% Poetry is the theory of life should be
-% Poetry, like theory... 
-
-
+%%
 % -=-=-=-=-=-=-=-= RIP =-=-=-=-=-=-=-=-=-
 %          | Code Graveyard |
 
+% Poetry is the theory of how life should be
+% Poetry, like theory...
 
 % % fun with robost fit
 % x = (1:10)';

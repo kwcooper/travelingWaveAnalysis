@@ -1,21 +1,21 @@
-%%
-% Requires: Root Object
+function [] = twWaveVariabilityTwo(root, figData, sim, scan)
+%TWWAVEVARIBILITYTWO
 
-% td: simulated data
-Rat = 'Test';
+% sim is used to simulate data, scan is used to paroose aquired
+% peaks/troughs
 
 % lets set some defaults and allocate mats
-name = Rat; 
+name = figData.ratInfo.name; 
+if sim
+  Rat = 'Test';
+end
+
 origData = root.user_def.lfp_origData; 
-epch = CTA.epDat;
-atw = CTA.avgThetaWave;
 phs = pi; % pi=toughs; 0=peaks;
-%cycles = root.user_def.cycles; 
 
 thetaPhs = nan(size(origData));
-thetaAmp = nan(size(origData));
 cycles = nan(size(origData));
-
+%%
 
 % Let's grab the cycles and phase (root has one, but it used hilbert)
 for i = 1:size(origData,1)
@@ -76,23 +76,9 @@ end
 % alt: we could check for epochs with only 4 peaks
 %     sum(cyclesEpoched{i}, _) > 2 % or check other demention also for > 4  
 
-
-
-% Make simulated data: cyclesEpoched
-% Will add random distro functions soon...
-cellSize = size(cyclesEpoched, 1);
-numChan = size(cyclesEpoched{1}, 2);
-testData = cell(cellSize, 1);
-for i = 1:cellSize
-  z = zeros(100,numChan);
-  nds(1,1) = 48;
-  for j = 2:numChan; nds(1,j) = nds(1,j-1) + 101; end
-  z(nds) = 1;
-  testData{i} = z;
+if sim
+  cyclesEpoched = makeSimData(cyclesEpoched);
 end
- 
-
-cyclesEpoched = testData;
 
 % Now let's grab the inds of each peak
 dropCount = 0;
@@ -274,10 +260,11 @@ end
 
 % Check how the tweedledorph looks over the raw data (Theta/data)
 figure; plot(origData(1,1:1000)/500); hold on; plot(thetaPhs(1,1:1000))
+end 
 
 %%
 % Make simulated data: cyclesEpoched
-% Will add random distro functions soon...
+function testData = makeSimData(cyclesEpoched)
 cellSize = size(cyclesEpoched, 1);
 numChan = size(cyclesEpoched{1}, 2);
 testData = cell(cellSize, 1);
@@ -285,22 +272,29 @@ per = 0;
 for i = 1:cellSize
   z = zeros(100,numChan);
   % Make perfect dataset
-  if per = 1
+  if per
     nds(1,1) = 48;
     for j = 2:numChan;nds(1,j) = nds(1,j-1) + 101; end
     z(nds) = 1;
-  % Make noisy dataset
-  else 
+    % Make noisy dataset
+  else
     for j = 1:numChan
-      ndI = random('Normal',48 + j,.5,1,100);
-      z(ndI,j) = 1
+      ndI = random('Normal',48 + j,.5,1,1);
+      z(round(ndI),j) = 1;
     end
   end
   testData{i} = z;
 end
- 
-
+end
 %%
+
+
+
+
+
+
+
+
 % -=-=-=-=-=-=-=-= RIP =-=-=-=-=-=-=-=-=-
 %          | Code Graveyard |
 

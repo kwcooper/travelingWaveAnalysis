@@ -131,6 +131,9 @@ ind1 = 650;
 ind2 = 750;
 [rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2, 0 );
 figData.rawWaves = rawWaves;
+
+% function to see variability in slope of data
+twWaveVariability(root, figData, 0,  0, 0)
 %% SubPlotting
 %pause;
 %twCombineFigs(figData, plt);

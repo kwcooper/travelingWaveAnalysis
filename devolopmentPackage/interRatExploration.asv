@@ -30,11 +30,32 @@ end
 %slopes(1,i) = ratRegress.(namefields{i}).pd.B(1); 
 slopesPrime = reshape(slopes, [1,numel(slopes)]);
 
-fprintf(['The mean of the slopes is: ', num2str(mean(slopes)), ' (n = ', num2str(numel(namefields)),')\n']);
+fprintf(['The mean of the slopes is: ', num2str(mean(slopesPrime)), ' (n = ', num2str(numel(namefields)),')\n']);
 
 if plt
-  histogram(slopes)
-  title(['Slope of wave offset, mean: ', num2str(mean(slopes)), ' (n = ', num2str(numel(namefields)),')']);
+  histogram(slopesPrime)
+  title(['Slope of wave offset, mean: ', num2str(mean(slopesPrime)), ' (n = ', num2str(numel(namefields)),')']);
 end
 
+
+
+%find phase shift 
+
+
+w1 = 
+w2 = 
+% calculate phase offset in rad then convert to deg
+offsetRad=acos(dot(w1,w2)/(norm(w1)*norm(v)))
+offsetDeg=offsetRad*360/(2*pi)
+
+
+
+
+
 end
+
+
+
+
+
+

@@ -17,10 +17,8 @@ end
 origData = root.user_def.lfp_origData; 
  % pi=toughs; 0=peaks;
 
-thetaPhsPeaks = nan(size(origData));
-cyclesTroughs = nan(size(origData));
-thetaPhsPeaks = nan(size(origData));
-cyclesTroughs = nan(size(origData));
+thetaPhsPeaks = nan(size(origData)); cyclesTroughs = nan(size(origData));
+thetaPhsPeaks = nan(size(origData)); cyclesTroughs = nan(size(origData));
 
 phs = 0; fprintf(['Grabbing theta cycles (peaks)\n']);
 for i = 1:size(origData,1)
@@ -157,7 +155,7 @@ ci = bootci(5000,{@(x) median(x),cEPeaksSlopesRobust},'type','per');
 figure; histogram(cEPeaksSlopesRobust)
 title([name, ' Robust slopes | Peak | median: [', num2str(ci(1)),' ',num2str(ci(2)),']'])
 %title([name, ' Robust slopes | shift: ', num2str(phs)]) % statless version
-%for debugging b 
+%for debugging b  
 xlabel('slope')
 ylabel('num cycles')
 
@@ -168,8 +166,6 @@ title([name, ' Robust slopes | Trough | median: [', num2str(ci(1)),' ',num2str(c
 %title([name, ' Robust slopes | shift: ', num2str(phs)]) % statless version for debugging
 xlabel('slope')
 ylabel('num cycles')
-
-
 
 % and a histogram of Coorolation coef (!) TD needs lookin' at
 figure; histogram(cECorCoRobust)

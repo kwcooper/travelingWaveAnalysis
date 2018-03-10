@@ -37,7 +37,8 @@ sessions = {...
 };
 
 iteration = 1;
-sess2run = [2 5 11 12 18 20]; %[2 5 11 12 13 14 18 20] best set without roble
+sess2run = [2 5 11 12 18 20 25]; %[2 5 11 12 13 14 18 20] best set without roble
+ratLibPath = fullfile(ratLibPath,'ratsEphys'); % temp due to path errors
 for i = sess2run %Select which sessions you would like to run
   
   sInd = i; % This selects the session you want to analyze TD: add user input

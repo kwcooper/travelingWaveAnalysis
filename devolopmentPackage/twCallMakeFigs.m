@@ -36,12 +36,13 @@ sessions = {...
 'Roble',       'OpenFieldBigger_2017-12-19','2017-12-19_20-04-50',   'sml',       [28 32 4 8 11 15 19 23],                           1,  [650 750];...
 'Roble',       'OpenFieldBigger_2017-12-19','2017-12-20_17-31-46',   'all',       [28 32 4 8 11 15 19 23 26 30 2 6 9 13 17 21],      16, [650 750];... %24
 'Romo',        'CircleTrack_2017-11-27',    '2017-11-27_12-44-08',   'goodCh',    [57 61 47 38 33],                                   1, [];...
+%'Regio'
 };
 
 Rat =  sessions{sInd,1};
 Session =  sessions{sInd,2};
 Recording =  sessions{sInd,3};
-chTxt = sessions{sInd,4};
+chTxt = sessions{sInd,4};  
 chOrd = sessions{sInd,5}; 
 ref = sessions{sInd,6};
 badEnds = sessions{sInd,7}; % !! could update this to good ends?

@@ -143,7 +143,9 @@ end
 
 check = isnan(cETroughsSlopesRobust);
 if sum(check) > 0
-  ii = find()
+  ii = find(check)
+  cETroughsSlopesRobust(ii) = 0;
+end
 %%
 % let's take a look at each slope
 figure; plot(1:size(cEPeaksSlopesRobust, 1), cEPeaksSlopesRobust, '.r');
@@ -153,23 +155,16 @@ title([name, ' Robust ', phsTxt,'Slopes'])
 
 ci = bootci(5000,{@(x) median(x),cEPeaksSlopesRobust},'type','per');
 figure; histogram(cEPeaksSlopesRobust)
-title([name, ' Robust ', phsTxt, ' slopes | Peak | median: [', num2str(ci(1)),' ',num2str(ci(2)),']'])
-%title([name, ' Robust slopes | shift: ', num2str(phs)]) % statless version for debugging
+title([name, ' Robust slopes | Peak | median: [', num2str(ci(1)),' ',num2str(ci(2)),']'])
+%title([name, ' Robust slopes | shift: ', num2str(phs)]) % statless version
+%for debugging b  
 xlabel('slope')
 ylabel('num cycles')
 
 % And a histogram of slopes, along with stats
 ci = bootci(5000,{@(x) median(x),cETroughsSlopesRobust},'type','per');
 figure; histogram(cETroughsSlopesRobust)
-title([name, ' Robust ', phsTxt, ' slopes | Trough | median: [', num2str(ci(1)),' ',num2str(ci(2)),']'])
-%title([name, ' Robust slopes | shift: ', num2str(phs)]) % statless version for debugging
-xlabel('slope')
-ylabel('num cycles')
-
-% And a histogram of slopes, along with stats
-ci = bootci(5000,{@(x) median(x),cESlopesRobust},'type','per');
-figure; histogram(cESlopesRobust)
-title([name, ' Robust ', phsTxt, ' slopes | shift: ', num2str(phs),' | median: [', num2str(ci(1)),' ',num2str(ci(2)),']'])
+title([name, ' Robust slopes | Trough | median: [', num2str(ci(1)),' ',num2str(ci(2)),']'])
 %title([name, ' Robust slopes | shift: ', num2str(phs)]) % statless version for debugging
 xlabel('slope')
 ylabel('num cycles')

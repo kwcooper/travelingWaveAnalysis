@@ -15,10 +15,10 @@ end
 figure; imagesc(corrMat)
 title('DFC: Rio')
 
-for i = 1:4
-  chan = linspace(1,10,20)
-
-end
+% for i = 1:4
+%   chan = linspace(1,10,20);
+% 
+% end
 
 
 

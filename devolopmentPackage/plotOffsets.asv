@@ -1,11 +1,13 @@
 function plotOffsets(data)
 % PLOTOFFSETS: plots the data in a more viewable manner
+% pass the data as a chan X time 
 
 
 [tPts,nElecs] = size(data);
 % double check if the orientation is chill
 if tPts < nElecs
   data = data';
+  [tPts,nElecs] = size(data);
 end
 
 t = linspace(0,1,tPts);
@@ -16,7 +18,6 @@ lfp_ = lfp_ + offsets;
 h = figure;
 plot(t,lfp_,'k'); axis ij;
 %Change axis to reflect proper channels
-
 
 grid on
 

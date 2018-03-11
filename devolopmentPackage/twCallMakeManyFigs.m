@@ -111,26 +111,28 @@ figData.savePath = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland'
 figData.fig_type = 'png'; % options = {'png','ps','pdf'} 
 
 %Grab the intra rat struct
-ratRegressStruct = 'ratRegress.mat';
-structPath = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave', ratRegressStruct); 
+ratStruct = 'ratsComp.mat';
+structPath = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave', ratStruct); 
 if ~exist(structPath, 'file')
   % check if struct exists, if not, create it!
-  fprintf('> No regression structure found, creating one... ');
-  ratRegress = struct;
-  save(structPath,'ratRegress','-v7.3'); 
+  fprintf('> No rat structure found, creating one... ');
+  ratsComp = struct;
+  save(structPath,'ratsComp','-v7.3'); 
   fprintf('saved.\n');
   foundStruct = load(structPath);
-  ratRegress = foundStruct.ratRegress;
+  ratsComp = foundStruct.ratsComp;
 else
   % load it back in 
   foundStruct = load(structPath);
   fprintf('> Loading in struct\n');
-  ratRegress = foundStruct.ratRegress;
+  ratsComp = foundStruct.ratsComp;
 end
+
+
 % Add metadata to the struct
 recordingPrime = matlab.lang.makeValidName(Recording); % Session names arn't compatable
-ratRegress.(Rat).(recordingPrime) = struct;
-ratRegress.(Rat).(recordingPrime).info = figData.ratInfo;
+ratsComp.ratRegress.(Rat).(recordingPrime) = struct;
+ratsComp.ratRegress.(Rat).(recordingPrime).info = figData.ratInfo;
 
 %% Plotting
 % Makes the average wave plot  b
@@ -144,7 +146,7 @@ figData.CTA = CTA;
 % twCrossCorr(root)
 pd = twPlotPeakDiff(root, figData, plt);
 figData.pd = pd;
-ratRegress.(Rat).(recordingPrime).pd = figData.pd;
+ratsComp.ratRegress.(Rat).(recordingPrime).pd = figData.pd;
 % Raw LFP: Grabs the raw data from the specified indicies
 % td Set these to the specified ends
 
@@ -153,11 +155,15 @@ ind2 = 750;
 [rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2, plt);
 figData.rawWaves = rawWaves;
 
+%grab shifts (Degrees)
+shiftsPerChanDeg = twPhaseShift(CTA.avgThetaWave);
+ratsComp.shiftsPerChanDeg.(Rat) = shiftsPerChanDeg; 
+
 % Histogram and slope mean
 %interRatExploration(ratRegress, plt)
 %%
 % save the struct
-save(structPath,'ratRegress','-v7.3'); 
+save(structPath,'ratsComp','-v7.3'); 
 iteration = iteration + 1;
 end
 

@@ -58,3 +58,18 @@ CTA.lfp_ = lfp_;
 CTA.t = t;
 CTA.epDat = epchData;
 root.user_def.atw = avgThetaWave';
+
+%% for poster
+h = figure;
+plot(t,lfp_); axis ij;
+%Change axis to reflect proper channels
+ax = gca;
+ax.Visible = 'off';
+set(findall(gca, 'Type', 'Line'),'LineWidth',2);
+xlabel('Time') %!! Is this correct? or should it be phase?
+ylabel('Channel') % !! What about the axis though...
+title(['Averaged Waves: ', figData.ratInfo.name])
+
+
+
+end

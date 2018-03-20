@@ -1,4 +1,4 @@
-function interRatExploration(ratRegress, plt)
+function interRatExploration(ratsComp, plt)
 
 %to do:
 % restructure the ratStruct by session for multiple per rat!
@@ -14,15 +14,15 @@ function interRatExploration(ratRegress, plt)
 % Gather the slopes from all the rats
 % assumes that each rat has the same number of recordings
 clear namefieldsfields;
-namefields = fieldnames(ratRegress);
+namefields = fieldnames(ratsComp.ratRegress);
 %slopes = nan(1, numel(namefields));
 for i = 1:numel(namefields)
-  namefieldsfields(i,:) = fieldnames(ratRegress.(namefields{i}))';
+  namefieldsfields(i,:) = fieldnames(ratsComp.ratRegress.(namefields{i}))';
 end
 
 for k = 1:numel(namefields)
   for i = 1:size(namefieldsfields,2)
-      slopes(k,i) = ratRegress.(namefields{k}).(char(namefieldsfields(k,i))).pd.B(1);
+      slopes(k,i) = ratsComp.ratRegress.(namefields{k}).(char(namefieldsfields(k,i))).pd.B(1);
   end
 end
 
@@ -38,7 +38,26 @@ if plt
 end
 
 
+% slope of offset scatter plot
+y = [1 2 3 4];
+%figure; scatter(slopesPrime, y)
 
+numSess = 2;
+numAnimal = 4;
+slopesP = reshape(slopesPrime, [numSess,numAnimal])';
+slopesP = slopesP * -1; % bring them back positive
+sPAvg = mean(slopesP');
+sPError = std(slopesP') / sqrt(numSess);
+
+y = [1 2 3 4];
+sze = []; c = [1,2,3,5];
+figure; scatter(y,sPAvg,sze,c,'filled');
+axis([0,4.5,0,.4]); hold on;
+err = sPError;
+errorbar(y, x, err, 'LineStyle', 'none');
+set(gca,'xtick',0:4);
+title('Average Theta Shift Slopes');
+xlabel('Animal'); ylabel('Slope');
 end
 
 

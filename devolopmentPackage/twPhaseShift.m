@@ -24,7 +24,18 @@ offsetDeg = offsetRad*360/(2*pi);
 shiftsPerChanDeg(:,i) = offsetDeg; 
 end
 
-shiftsPerChanDeg;
+% finds the average shift
+spacing = 566; % in um
+rats = fieldnames(ratsComp.shiftsPerChanDeg);
+for i = 1:size(rats,1)
+  offsetMean(i,1) = mean(ratsComp.shiftsPerChanDeg.(rats{i}));
+end
+
+% find the average 
+avgDegOffset = mean(offsetMean);
+%avgDegOffset / spacing
+
+
 
 end
 

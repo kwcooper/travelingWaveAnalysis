@@ -5,8 +5,8 @@ fprintf('\nWelcome to the Travleing Wave Project''s Analysis Package!\n');
 %  Add raw lfp ends to the sessions structure
 
 clear all;
-sInd = 2; % This selects the session you want to analyze TD: add user input
-force = 0; % forces a recalculation of the data 
+sInd = 23; % This selects the session you want to analyze TD: add user input
+force = 1; % forces a recalculation of the data 
 
 %% Contains ephys file information, as well as channel mappings, and good epoch data
 % Rat          Session                     Recording                notes        Channels                                     reference ends
@@ -106,7 +106,7 @@ figData.ratInfo.recording = Recording;
 figData.ratInfo.chOrdTxt = chTxt;
 figData.ratInfo.ref = ref;
 
-plt = 1;
+plt = 0;
 
 figData.saveFig = 1;
 figData.figDir = 'twImgDir';
@@ -116,8 +116,7 @@ figData.fig_type = 'png'; % options = {'png','ps','pdf'}
 
 %Makes the average wave plot  b
 % td add argument for window width (two cycles) 
-epochSize = 0.100;
-
+epochSize = 0.140; %one hump 0.100;
 [CTA] = plotCycleTriggeredAvg(root, epochSize, figData, plt);
 figData.CTA = CTA;
 
@@ -127,10 +126,10 @@ pd = twPlotPeakDiff(root, figData, plt);
 figData.pd = pd;
 
 % Raw LFP: Grabs the raw data from the specified indicies
-% td Set these to the specified ends
-ind1 = 650;
-ind2 = 750;
-[rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2, 0 );
+% td Set these to the specified ends (romo 2Hps: 650 - 815)
+ind1 = 720;
+ind2 = 866;
+[rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2, plt);
 figData.rawWaves = rawWaves;
 
 % function to see variability in slope of data

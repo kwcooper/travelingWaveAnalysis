@@ -5,8 +5,8 @@ fprintf('\nWelcome to the Travleing Wave Project''s Analysis Package!\n');
 %  Add raw lfp ends to the sessions structure
 
 clear all;
-sInd = 2; % This selects the session you want to analyze TD: add user input
-force = 0; % forces a recalculation of the data 
+sInd = 23; % This selects the session you want to analyze TD: add user input
+force = 1; % forces a recalculation of the data 
 
 %% Contains ephys file information, as well as channel mappings, and good epoch data
 % Rat          Session                     Recording                notes        Channels                                     reference ends
@@ -36,12 +36,13 @@ sessions = {...
 'Roble',       'OpenFieldBigger_2017-12-19','2017-12-19_20-04-50',   'sml',       [28 32 4 8 11 15 19 23],                           1,  [650 750];...
 'Roble',       'OpenFieldBigger_2017-12-19','2017-12-20_17-31-46',   'all',       [28 32 4 8 11 15 19 23 26 30 2 6 9 13 17 21],      16, [650 750];... %24
 'Romo',        'CircleTrack_2017-11-27',    '2017-11-27_12-44-08',   'goodCh',    [57 61 47 38 33],                                   1, [];...
+%'Regio'
 };
 
 Rat =  sessions{sInd,1};
 Session =  sessions{sInd,2};
 Recording =  sessions{sInd,3};
-chTxt = sessions{sInd,4};
+chTxt = sessions{sInd,4};  
 chOrd = sessions{sInd,5}; 
 ref = sessions{sInd,6};
 badEnds = sessions{sInd,7}; % !! could update this to good ends?
@@ -105,7 +106,7 @@ figData.ratInfo.recording = Recording;
 figData.ratInfo.chOrdTxt = chTxt;
 figData.ratInfo.ref = ref;
 
-plt = 1;
+plt = 0;
 
 figData.saveFig = 1;
 figData.figDir = 'twImgDir';
@@ -115,7 +116,7 @@ figData.fig_type = 'png'; % options = {'png','ps','pdf'}
 
 %Makes the average wave plot  b
 % td add argument for window width (two cycles) 
-epochSize = 0.100;
+epochSize = 0.150; %one hump 0.100;
 
 [CTA] = plotCycleTriggeredAvg(root, epochSize, figData, plt);
 figData.CTA = CTA;
@@ -126,16 +127,14 @@ pd = twPlotPeakDiff(root, figData, plt);
 figData.pd = pd;
 
 % Raw LFP: Grabs the raw data from the specified indicies
-% td Set these to the specified ends
-ind1 = 650;
-ind2 = 750;
-[rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2, 0 );
+% td Set these to the specified ends (romo 2Hps: 650 - 815)
+ind1 = 700;
+ind2 = ;
+[rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2, plt);
 figData.rawWaves = rawWaves;
 
 % function to see variability in slope of data
-% sim is used to simulate data, scan is used to paroose aquired
-% peaks/troughs
-twWaveVariabilityTwo(root, figData, phs,  sim, scan)
+twWaveVariability(root, figData, 0,  0, 0)
 %% SubPlotting
 %pause;
 %twCombineFigs(figData, plt);

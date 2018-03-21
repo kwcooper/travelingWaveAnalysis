@@ -1,21 +1,20 @@
-function [] = twWaveVariability(root, figData, phs, sim, scan)
+function [] = twWaveVariability(root, figData, phs, simu, scan)
 %TWWAVEVARIBILITY analyze the varibility in the wave offset
 %
 % phs  (0/pi) peaks/troughs, respectively
-% sim  (1/0)  used to simulate data, 
+% simu (1/0)  used to simulate data, 
 % scan (1/0)  used to paroose aquired
-
 
 
 fprintf('\nExploring varibility in theta wave offset...\n');
 % set defaults and allocate mats
 name = figData.ratInfo.name; 
-if sim
+if simu
   Rat = 'Test';
 end
 
 origData = root.user_def.lfp_origData; 
-phs = pi; % pi=toughs; 0=peaks;
+%phs = pi; % pi=toughs; 0=peaks;
 if isequal(phs, 0)
   phsTxt = 'peaks';
 else
@@ -41,7 +40,7 @@ end
 cycleInds = find(cycles(1,:)); cyclesSize = size(cycles,2);
 badCycles = root.user_def.cleanData_inds2cut(cycleInds);
 cycleInds(badCycles) = []; 
-fprintf(['Cleaned ', num2str(cyclesSize-size(cycleInds,2)), ' data points. (booted bad data)\n'])
+fprintf(['Cleaned ', num2str(cyclesSize-size(cycleInds,2)), ' data points.\n'])
 
 
 % epoch the cycles
@@ -71,7 +70,7 @@ cyclesCycles = cell2mat(cyclesEpoched);
 
 %%
 % inject simulated data here if 1
-if sim
+if simu
   cyclesEpoched = makeSimData(cyclesEpoched);
 end
 
@@ -95,7 +94,7 @@ for i = 1:size(cyclesEpoched, 1)
   end
 end
 
-%%
+
 %let's find the mean ind for all cycles per epoch
 for i = 1:size(cyclesEpochedInds, 2)
   meanCycleInd(i, :) = mean(cyclesEpochedInds{i});
@@ -121,6 +120,7 @@ for i = 1:size(cyclesEpochedInds, 2)
   cECorCoRobust(i, 1) = stats.coeffcorr(2); 
 end
 
+%%
 % let's take a look at each slope
 figure; plot(1:size(cESlopesRobust, 1), cESlopesRobust, '.')
 title([name, ' Robust ', phsTxt,'Slopes'])
@@ -134,16 +134,49 @@ xlabel('slope')
 ylabel('num cycles')
 
 
-
-% and a histogram of Coorolation coef
+% and a histogram of Coorolation coef (!) TD needs lookin' at
 figure; histogram(cECorCoRobust)
 title([name, ' ', phsTxt, ' Robust corCo'])
 xlabel('Corrolation Coef')
 ylabel('num cycles')
 
-% TD: add code to save figs
+
+keyboard;
+
+% histogram for poster
+nBins = ceil(sqrt(size(cESlopesRobust,1))); % num bins ~ rounded sqrt size of data
+figure; h = histogram(cESlopesRobust, nBins);
+
+ci = bootci(5000,{@(x) median(x),cESlopesRobust},'type','per');
+%title([name, ' Robust ', phsTxt, ' slopes | shift: ', num2str(phs),' | median: [', num2str(ci(1)),' ',num2str(ci(2)),']'])
+%title([name, ' Robust slopes | shift: ', num2str(phs)]) % statless version for debugging
+disp
+title('Trough Slope Offsets') %(Change for each plot!!)
+xlabel('Slope'); ylabel('Number of Cycles'); 
+axis([-10, 10, 0, 450]);
+set(h,'facecolor',[0.3 0.7 0.2]);
+
+keyboard;
+
+figure; 
+hh = histfit(cESlopesRobust, nBins);
+save('roblePeakDist.mat', 'hh')
+
+% saved structs
+% look at the difference between the distrobutions 
+load roblePeakDist.mat % hh
+load robleTroughDist.mat % h
+
+figure; plot(h(2).XData, h(2).YData, 'g')
+hold on; plot(hh(2).XData, hh(2).YData, 'b')
+title('Peaks vs Troughs');
+xlabel('Slope'); ylabel('Number of Cycles'); 
 
 
+% look at hist data...
+figure; plot(h(1).XData, h(1).YData)
+hold on; plot(hh(1).XData, hh(1).YData)
+set(h,'EdgeColor',[1 1 1])
 %%
 % quality control
 
@@ -167,10 +200,7 @@ if 0
 end
 
 
-% let's make the histogram's look good now
-nBins = ceil(sqrt(size(cESlopesRobust,1))); % num bins ~ rounded sqrt size of data
-figure;
-h = histogram(cESlopesRobust, nBins)
+
 
 
 %%
@@ -208,6 +238,52 @@ if scan
     
     title(['set ', num2str(i), ' Slope: ', num2str(p(1)), ' RobustS: ', num2str(b(1)), 'RobustCorCo: ',num2str(stats.coeffcorr(2)) ]);
     xlabel('cycInd'); ylabel('offset');
+    pause;
+  end
+end
+
+%%
+% Scan code for poster
+pstr = 0;
+if pstr
+  root.b_myvar = origData'; epchLFP = root.myvar;
+  root.b_myvar = thetaPhs'; epchThP = root.myvar;
+  root.b_myvar = cycles';   epchCyc = root.myvar;
+  figure; if ~exist('startInd','var'), startInd = 1; end
+  for i = startInd:size(cyclesEpochedInds,2)
+    cyclesEpochedTs = cyclesEpochedInds{i}; nChan = size(cyclesEpochedTs, 1);
+    p = polyfit(1:nChan,cyclesEpochedTs',1);
+    pv = polyval(p, 1:nChan);
+    [b,stats] = robustfit(1:nChan,cyclesEpochedTs);
+    b = fliplr(b');
+    bv = polyval(b, 1:nChan);
+    
+    %plot the raw data
+    tmpLFP = spreadLFP(epchLFP{i}')';
+    hold off; 
+    h = plot(tmpLFP);
+    size(tmpLFP)
+    set(h, {'color'}, flipud(num2cell(lines(size(tmpLFP, 2)),2)));
+    set(findall(gca, 'Type', 'Line'),'LineWidth',2);
+    
+    %plot the inds of each waveform
+    offsets = [0:nChan-1]*size(tmpLFP,1);
+    tmpX = repmat(cyclesEpochedTs',2,1); tmpY = [1:nChan;tmpLFP(cyclesEpochedTs+offsets')'];
+    hold on; plot(tmpX, tmpY, 'k:');
+    plot(cyclesEpochedTs', 1:nChan, 'ok');
+    %plot(spreadLFP(epchThP{i}',8)','c');
+    %plot(spreadLFP(epchCyc{i}',2)','m:');
+    %plot(spreadLFP(cyclesEpoched{i}',2)','m--');
+    
+    pvX = repmat(pv,2,1); bvX = repmat(bv,2,1); chanY = reshape(repmat(0:nChan,2,1),[],1);
+    %plot(pv', 1:size(cyclesEpochedInds{i},1), 'b-.');
+    plot(bv', 1:size(cyclesEpochedInds{i},1), 'k');
+    ax = gca; ax.Visible = 'off';
+    
+    
+    
+    %title(['set ', num2str(i), ' Slope: ', num2str(p(1)), ' RobustS: ', num2str(b(1)), 'RobustCorCo: ',num2str(stats.coeffcorr(2)) ]);
+    %xlabel('cycInd'); ylabel('offset');
     pause;
   end
 end

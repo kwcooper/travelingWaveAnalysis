@@ -37,6 +37,7 @@ sessions = {...
 'Roble',       'OpenFieldBigger_2017-12-19','2017-12-20_17-31-46',   'all',       [28 32 4 8 11 15 19 23 26 30 2 6 9 13 17 21],      16, [650 750];... %24
 'Romo',        'CircleTrack_2017-11-27',    '2017-11-27_12-44-08',   'goodCh',    [57 61 47 38 33],                                   1, [];...
 %'Regio'
+
 };
 
 Rat =  sessions{sInd,1};
@@ -128,12 +129,12 @@ figData.pd = pd;
 % Raw LFP: Grabs the raw data from the specified indicies
 % td Set these to the specified ends (romo 2Hps: 650 - 815)
 ind1 = 720;
-ind2 = 866;
+ind2 = 1251; %866;
 [rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2, plt);
 figData.rawWaves = rawWaves;
 
 % function to see variability in slope of data
-twWaveVariability(root, figData, 0,  0, 0)
+twWaveVariability(root, figData, pi,  0, 0)
 %% SubPlotting
 %pause;
 %twCombineFigs(figData, plt);

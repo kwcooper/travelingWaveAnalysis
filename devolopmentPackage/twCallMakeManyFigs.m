@@ -36,6 +36,10 @@ sessions = {...
 'Roble',       'OpenFieldBigger_2017-12-19','2017-12-20_17-31-46',   'all',       [28 32 4 8 11 15 19 23 26 30 2 6 9 13 17 21],      16, [650 750];... %26
 };
 
+% tio dataSet: 2017-07-18_12-16-08
+
+% regio 
+
 iteration = 1;
 sess2run = [2 5 11 12 18 20 25]; %[2 5 11 12 13 14 18 20] best set without roble
 ratLibPath = fullfile(ratLibPath,'ratsEphys'); % temp due to path errors

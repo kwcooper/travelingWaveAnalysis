@@ -36,6 +36,10 @@ sessions = {...
 'Roble',       'OpenFieldBigger_2017-12-19','2017-12-20_17-31-46',   'all',       [28 32 4 8 11 15 19 23 26 30 2 6 9 13 17 21],      16, [650 750];... %26
 };
 
+% tio dataSet: 2017-07-18_12-16-08
+
+%regio
+
 iteration = 1;
 sess2run = [2 5 11 12 18 20 25]; %[2 5 11 12 13 14 18 20] best set without roble
 ratLibPath = fullfile(ratLibPath,'ratsEphys'); % temp due to path errors
@@ -120,19 +124,19 @@ if ~exist(structPath, 'file')
   save(structPath,'ratsComp','-v7.3'); 
   fprintf('saved.\n');
   foundStruct = load(structPath);
-  ratsComp = foundStruct.rats;
+  ratsComp = foundStruct.ratsComp;
 else
   % load it back in 
   foundStruct = load(structPath);
   fprintf('> Loading in struct\n');
-  ratsComp = foundStruct.rats;
+  ratsComp = foundStruct.ratsComp;
 end
 
 
 % Add metadata to the struct
 recordingPrime = matlab.lang.makeValidName(Recording); % Session names arn't compatable
 ratsComp.ratRegress.(Rat).(recordingPrime) = struct;
-ratRegress.(Rat).(recordingPrime).info = figData.ratInfo;
+ratsComp.ratRegress.(Rat).(recordingPrime).info = figData.ratInfo;
 
 %% Plotting
 % Makes the average wave plot  b
@@ -146,7 +150,7 @@ figData.CTA = CTA;
 % twCrossCorr(root)
 pd = twPlotPeakDiff(root, figData, plt);
 figData.pd = pd;
-ratRegress.(Rat).(recordingPrime).pd = figData.pd;
+ratsComp.ratRegress.(Rat).(recordingPrime).pd = figData.pd;
 % Raw LFP: Grabs the raw data from the specified indicies
 % td Set these to the specified ends
 
@@ -156,14 +160,14 @@ ind2 = 750;
 figData.rawWaves = rawWaves;
 
 %grab shifts (Degrees)
-shiftsPerChanDeg = twPhaseShift(atw);
-ratsShiftDeg = 
+shiftsPerChanDeg = twPhaseShift(CTA.avgThetaWave);
+ratsComp.shiftsPerChanDeg.(Rat) = shiftsPerChanDeg; 
 
 % Histogram and slope mean
 %interRatExploration(ratRegress, plt)
 %%
 % save the struct
-save(structPath,'ratRegress','-v7.3'); 
+save(structPath,'ratsComp','-v7.3'); 
 iteration = iteration + 1;
 end
 

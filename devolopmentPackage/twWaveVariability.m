@@ -14,6 +14,9 @@ if simu
 end
 
 origData = root.user_def.lfp_origData; 
+% flip data to keep consistant slope
+origData = flipud(origData);
+
 %phs = pi; % pi=toughs; 0=peaks;
 if isequal(phs, 0)
   phsTxt = 'peaks';
@@ -145,8 +148,35 @@ keyboard;
 
 figure;
 hold on;
-bar(1:2,mean([num2str(ci(1)), num2str(ci(2))]));
-errorbar(1:2,num2str(ci(1)), num2str(ci(2)),'.');
+bar(1,mean(cESlopesRobust));
+errorbar(1,ci(1),ci(2),'.');
+
+
+load('means.mat')
+means.trough.slopes = cESlopesRobust;
+means.trough.ci = ci;
+
+means.peak.slopes = cESlopesRobust;
+means.peak.ci = ci;
+save('means.mat', 'means')
+
+% median slope offset
+figure; hold on;
+b = bar(1:2,[median(means.trough.slopes), median(means.peak.slopes)], 'BarWidth', 0.3);
+tci = abs(means.trough.ci - repmat(median(means.trough.slopes), 2, 1));
+pci = abs(means.peak.ci - repmat(median(means.peak.slopes), 2, 1));
+
+errorbar(1:2,[median(means.trough.slopes), median(means.peak.slopes)],[tci(1), pci(1)],'.');
+lbls = {'Troughs'; 'Peaks'}; set(gca,'xtick',[1:2],'xticklabel',lbls);
+title('Median Slope Offset: Troughs vs Peaks');
+
+figure
+BarMatrix = [1.2, 2.4];
+b = bar(BarMatrix,1,'LineStyle','none');
+CData = lines(4);
+for k = 1:size(BarMatrix,2)
+  b(k).FaceColor = CData(k,:);
+end
 
 keyboard;
 
@@ -159,17 +189,17 @@ errorbar(1:2,mean_velocity,std_velocity,'.')
 
 
 % histogram for poster
-% nBins = ceil(sqrt(size(cESlopesRobust,1))); % num bins ~ rounded sqrt size of data
-% figure; h = histogram(cESlopesRobust, nBins);
-% 
-% ci = bootci(5000,{@(x) median(x),cESlopesRobust},'type','per');
-% %title([name, ' Robust ', phsTxt, ' slopes | shift: ', num2str(phs),' | median: [', num2str(ci(1)),' ',num2str(ci(2)),']'])
-% %title([name, ' Robust slopes | shift: ', num2str(phs)]) % statless version for debugging
-% disp('change peak and trough labels!')
-% title('Trough Slope Offsets') %(Change for each plot!!)
-% xlabel('Slope'); ylabel('Number of Cycles'); 
-% axis([-10, 10, 0, 450]);
-% set(h,'facecolor',[0.9 0.2 0.2]);
+nBins = ceil(sqrt(size(cESlopesRobust,1))); % num bins ~ rounded sqrt size of data
+figure; h = histogram(cESlopesRobust, nBins);
+
+ci = bootci(5000,{@(x) median(x),cESlopesRobust},'type','per');
+%title([name, ' Robust ', phsTxt, ' slopes | shift: ', num2str(phs),' | median: [', num2str(ci(1)),' ',num2str(ci(2)),']'])
+%title([name, ' Robust slopes | shift: ', num2str(phs)]) % statless version for debugging
+disp('change peak and trough labels!')
+title('Trough Slope Offsets') %(Change for each plot!!)
+xlabel('Slope'); ylabel('Number of Cycles'); 
+axis([-10, 10, 0, 500]);
+set(h,'facecolor',[0.9 0.2 0.2]);
 % 
 % keyboard;
 % 
@@ -269,6 +299,7 @@ if pstr
   root.b_myvar = cycles';   epchCyc = root.myvar;
   figure; if ~exist('startInd','var'), startInd = 1; end
   for i = startInd:size(cyclesEpochedInds,2)
+    figure; i = 103;
     cyclesEpochedTs = cyclesEpochedInds{i}; nChan = size(cyclesEpochedTs, 1);
     p = polyfit(1:nChan,cyclesEpochedTs',1);
     pv = polyval(p, 1:nChan);
@@ -301,7 +332,7 @@ if pstr
     %plot(pv', 1:size(cyclesEpochedInds{i},1), 'b-.');
     plot(bv', 1:size(cyclesEpochedInds{i},1), 'k');
     ax = gca; ax.Visible = 'off';
-    axis xy
+    
     
     %title(['set ', num2str(i), ' Slope: ', num2str(p(1)), ' RobustS: ', num2str(b(1)), 'RobustCorCo: ',num2str(stats.coeffcorr(2)) ]);
     %xlabel('cycInd'); ylabel('offset');

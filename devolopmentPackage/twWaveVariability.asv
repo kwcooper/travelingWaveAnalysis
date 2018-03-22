@@ -143,40 +143,61 @@ ylabel('num cycles')
 
 keyboard;
 
-% histogram for poster
-nBins = ceil(sqrt(size(cESlopesRobust,1))); % num bins ~ rounded sqrt size of data
-figure; h = histogram(cESlopesRobust, nBins);
+figure;
+hold on;
+bar(1,mean(cESlopesRobust));
+errorbar(1,ci(1),ci(2),'.');
 
-ci = bootci(5000,{@(x) median(x),cESlopesRobust},'type','per');
-%title([name, ' Robust ', phsTxt, ' slopes | shift: ', num2str(phs),' | median: [', num2str(ci(1)),' ',num2str(ci(2)),']'])
-%title([name, ' Robust slopes | shift: ', num2str(phs)]) % statless version for debugging
-disp
-title('Trough Slope Offsets') %(Change for each plot!!)
-xlabel('Slope'); ylabel('Number of Cycles'); 
-axis([-10, 10, 0, 450]);
-set(h,'facecolor',[0.3 0.7 0.2]);
+means.trough.slopes = cESlopesRobust;
+means.trough.ci = ci;
+
 
 keyboard;
 
-figure; 
-hh = histfit(cESlopesRobust, nBins);
-save('roblePeakDist.mat', 'hh')
-
-% saved structs
-% look at the difference between the distrobutions 
-load roblePeakDist.mat % hh
-load robleTroughDist.mat % h
-
-figure; plot(h(2).XData, h(2).YData, 'g')
-hold on; plot(hh(2).XData, hh(2).YData, 'b')
-title('Peaks vs Troughs');
-xlabel('Slope'); ylabel('Number of Cycles'); 
+mean_velocity = [0.2574, 0.1225]; % mean velocity
+std_velocity = [0.5, 0.2278];  % standard deviation of velocity
+figure
+hold on
+bar(1:2,mean_velocity)
+errorbar(1:2,mean_velocity,std_velocity,'.')
 
 
-% look at hist data...
-figure; plot(h(1).XData, h(1).YData)
-hold on; plot(hh(1).XData, hh(1).YData)
-set(h,'EdgeColor',[1 1 1])
+% histogram for poster
+% nBins = ceil(sqrt(size(cESlopesRobust,1))); % num bins ~ rounded sqrt size of data
+% figure; h = histogram(cESlopesRobust, nBins);
+% 
+% ci = bootci(5000,{@(x) median(x),cESlopesRobust},'type','per');
+% %title([name, ' Robust ', phsTxt, ' slopes | shift: ', num2str(phs),' | median: [', num2str(ci(1)),' ',num2str(ci(2)),']'])
+% %title([name, ' Robust slopes | shift: ', num2str(phs)]) % statless version for debugging
+% disp('change peak and trough labels!')
+% title('Trough Slope Offsets') %(Change for each plot!!)
+% xlabel('Slope'); ylabel('Number of Cycles'); 
+% axis([-10, 10, 0, 450]);
+% set(h,'facecolor',[0.9 0.2 0.2]);
+% 
+% keyboard;
+% 
+% figure; 
+% hh = histfit(cESlopesRobust, nBins);
+% save('roblePeakDist.mat', 'hh')
+% 
+% % saved structs
+% % look at the difference between the distrobutions 
+% load roblePeakDist.mat % hh
+% load robleTroughDist.mat % h
+% 
+% figure; plot(hh(2).XData, hh(2).YData, 'b');
+% hold on; plot(h(2).XData, h(2).YData, 'r');
+% title('Slopes: Peaks vs Troughs');
+% xlabel('Slope'); ylabel('Number of Cycles'); 
+% legend('Peaks','Troughs');
+% axis([-8, 8, 0, 375]);
+% set(gca,'box','off');
+% 
+% % look at hist data...
+% figure; plot(h(1).XData, h(1).YData)
+% hold on; plot(hh(1).XData, hh(1).YData)
+% set(h,'EdgeColor',[1 1 1])
 %%
 % quality control
 
@@ -244,8 +265,9 @@ end
 
 %%
 % Scan code for poster
-pstr = 0;
+pstr = 1;
 if pstr
+  
   root.b_myvar = origData'; epchLFP = root.myvar;
   root.b_myvar = thetaPhs'; epchThP = root.myvar;
   root.b_myvar = cycles';   epchCyc = root.myvar;
@@ -260,7 +282,9 @@ if pstr
     
     %plot the raw data
     tmpLFP = spreadLFP(epchLFP{i}')';
-    hold off; 
+    hold off; %axis ij
+    %tmpLFP = fliplr(tmpLFP);
+    %tmpLFP = flipud(tmpLFP);
     h = plot(tmpLFP);
     size(tmpLFP)
     set(h, {'color'}, flipud(num2cell(lines(size(tmpLFP, 2)),2)));
@@ -269,18 +293,19 @@ if pstr
     %plot the inds of each waveform
     offsets = [0:nChan-1]*size(tmpLFP,1);
     tmpX = repmat(cyclesEpochedTs',2,1); tmpY = [1:nChan;tmpLFP(cyclesEpochedTs+offsets')'];
+    %tmpX = fliplr(tmpX); tmpY = fliplr(tmpY);
     hold on; plot(tmpX, tmpY, 'k:');
     plot(cyclesEpochedTs', 1:nChan, 'ok');
     %plot(spreadLFP(epchThP{i}',8)','c');
     %plot(spreadLFP(epchCyc{i}',2)','m:');
     %plot(spreadLFP(cyclesEpoched{i}',2)','m--');
     
+    % plot regression
     pvX = repmat(pv,2,1); bvX = repmat(bv,2,1); chanY = reshape(repmat(0:nChan,2,1),[],1);
     %plot(pv', 1:size(cyclesEpochedInds{i},1), 'b-.');
     plot(bv', 1:size(cyclesEpochedInds{i},1), 'k');
     ax = gca; ax.Visible = 'off';
-    
-    
+    axis xy
     
     %title(['set ', num2str(i), ' Slope: ', num2str(p(1)), ' RobustS: ', num2str(b(1)), 'RobustCorCo: ',num2str(stats.coeffcorr(2)) ]);
     %xlabel('cycInd'); ylabel('offset');
@@ -288,6 +313,7 @@ if pstr
   end
 end
 
+keyboard; 
 end 
 
 %%

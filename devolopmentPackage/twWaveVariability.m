@@ -143,7 +143,7 @@ title([name, ' ', phsTxt, ' Robust corCo'])
 xlabel('Corrolation Coef')
 ylabel('num cycles')
 
-
+%% Poster Plotting
 keyboard;
 
 figure;
@@ -160,24 +160,33 @@ means.peak.slopes = cESlopesRobust;
 means.peak.ci = ci;
 save('means.mat', 'means')
 
-% median slope offset
+%plot median
 figure; hold on;
-b = bar(1:2,[median(means.trough.slopes), median(means.peak.slopes)], 'BarWidth', 0.3);
+t = bar(1,[median(means.trough.slopes)*-1], 'BarWidth', 0.3);
+set(t,'FaceColor','r'); 
+p = bar(2,[median(means.peak.slopes)*-1], 'BarWidth', 0.3);
+set(p,'FaceColor','b');
 tci = abs(means.trough.ci - repmat(median(means.trough.slopes), 2, 1));
 pci = abs(means.peak.ci - repmat(median(means.peak.slopes), 2, 1));
 
-errorbar(1:2,[median(means.trough.slopes), median(means.peak.slopes)],[tci(1), pci(1)],'.');
+errorbar(1:2,[median(means.trough.slopes)*-1, median(means.peak.slopes)*-1],[tci(1), pci(1)],'.k');
 lbls = {'Troughs'; 'Peaks'}; set(gca,'xtick',[1:2],'xticklabel',lbls);
-title('Median Slope Offset: Troughs vs Peaks');
+title('Median Slope Offset: Troughs vs Peaks');% median slope offset bar graph
+set(gca, 'FontSize', 12)
 
-figure
-BarMatrix = [1.2, 2.4];
-b = bar(BarMatrix,1,'LineStyle','none');
-CData = lines(4);
-for k = 1:size(BarMatrix,2)
-  b(k).FaceColor = CData(k,:);
-end
+% mean plot
+figure; hold on;
+t = bar(1,[mean(means.trough.slopes)*-1], 'BarWidth', 0.3);
+set(t,'FaceColor','r');
+p = bar(2,[mean(means.peak.slopes)*-1], 'BarWidth', 0.3);
+set(p,'FaceColor','b');
+tci = abs(means.trough.ci - repmat(mean(means.trough.slopes), 2, 1));
+pci = abs(means.peak.ci - repmat(mean(means.peak.slopes), 2, 1));
 
+errorbar(1:2,[mean(means.trough.slopes)*-1, mean(means.peak.slopes)*-1],[tci(1), pci(1)],'.k');
+lbls = {'Troughs'; 'Peaks'}; set(gca,'xtick',[1:2],'xticklabel',lbls);
+title('Mean Slope Offset: Troughs vs Peaks');
+set(gca, 'FontSize', 12)
 keyboard;
 
 mean_velocity = [0.2574, 0.1225]; % mean velocity
@@ -199,6 +208,7 @@ disp('change peak and trough labels!')
 title('Trough Slope Offsets') %(Change for each plot!!)
 xlabel('Slope'); ylabel('Number of Cycles'); 
 axis([-10, 10, 0, 500]);
+set(gca, 'FontSize', 12)
 set(h,'facecolor',[0.9 0.2 0.2]);
 % 
 % keyboard;
@@ -248,8 +258,6 @@ end
 
 
 
-
-
 %%
 % Scan V2.0 ELN 220218
 % Pass through root to epoch
@@ -293,13 +301,12 @@ end
 % Scan code for poster
 pstr = 1;
 if pstr
-  
   root.b_myvar = origData'; epchLFP = root.myvar;
   root.b_myvar = thetaPhs'; epchThP = root.myvar;
   root.b_myvar = cycles';   epchCyc = root.myvar;
   figure; if ~exist('startInd','var'), startInd = 1; end
   for i = startInd:size(cyclesEpochedInds,2)
-    figure; i = 103;
+    figure; i = 28;
     cyclesEpochedTs = cyclesEpochedInds{i}; nChan = size(cyclesEpochedTs, 1);
     p = polyfit(1:nChan,cyclesEpochedTs',1);
     pv = polyval(p, 1:nChan);
@@ -310,8 +317,6 @@ if pstr
     %plot the raw data
     tmpLFP = spreadLFP(epchLFP{i}')';
     hold off; %axis ij
-    %tmpLFP = fliplr(tmpLFP);
-    %tmpLFP = flipud(tmpLFP);
     h = plot(tmpLFP);
     size(tmpLFP)
     set(h, {'color'}, flipud(num2cell(lines(size(tmpLFP, 2)),2)));
@@ -323,19 +328,11 @@ if pstr
     %tmpX = fliplr(tmpX); tmpY = fliplr(tmpY);
     hold on; plot(tmpX, tmpY, 'k:');
     plot(cyclesEpochedTs', 1:nChan, 'ok');
-    %plot(spreadLFP(epchThP{i}',8)','c');
-    %plot(spreadLFP(epchCyc{i}',2)','m:');
-    %plot(spreadLFP(cyclesEpoched{i}',2)','m--');
-    
     % plot regression
     pvX = repmat(pv,2,1); bvX = repmat(bv,2,1); chanY = reshape(repmat(0:nChan,2,1),[],1);
     %plot(pv', 1:size(cyclesEpochedInds{i},1), 'b-.');
     plot(bv', 1:size(cyclesEpochedInds{i},1), 'k');
     ax = gca; ax.Visible = 'off';
-    
-    
-    %title(['set ', num2str(i), ' Slope: ', num2str(p(1)), ' RobustS: ', num2str(b(1)), 'RobustCorCo: ',num2str(stats.coeffcorr(2)) ]);
-    %xlabel('cycInd'); ylabel('offset');
     pause;
   end
 end

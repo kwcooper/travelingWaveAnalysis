@@ -134,7 +134,8 @@ ind2 = 1251; %866;
 figData.rawWaves = rawWaves;
 
 % function to see variability in slope of data
-twWaveVariability(root, figData, 0,  0, 0)
+% 0 = peak ; pi = trough
+twWaveVariability(root, figData, pi,  0, 0)
 %% SubPlotting
 %pause;
 %twCombineFigs(figData, plt);

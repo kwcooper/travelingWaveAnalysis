@@ -1,0 +1,47 @@
+% as per the 4-10 spreadsheet update
+
+% Rat          Session                     Recording                cdtn        notes        Channels                                   reference ends
+sessions = {...
+'RioNovelty',  '2017-07-27_16-00',                '2017-08-09_16-57-57',   'all',       [43 44 46 45 40 39 37 38 59 60 58 57 52 51 53 54], 8, []; ...
+
+'Tio',	       '170713_1325_CircleTrack_good',	  '2017-07-13_13-41-41',	'Familiar', [53 52 58 59 37]
+'Tio',	       '170717_1824_CircleTrack',	        '2017-07-17_18-30-47',  'Novel', [53 52 58 59 37]
+			
+'Rio',	       '2017-08-09_CircleTrack',	        '2017-08-09_13-33-51',	'Familiar', [45 39 38 60 57]
+'RioNovelty',	 '2017-07-27_16-00',	              '2017-08-09_16-57-57',  'Novel',
+
+'Romo',	       'CircleTrack_2017-11-30',	        '2017-11-30_14-34-29',	'Familiar'
+'Romo',	       'CircleTrack_2017-11-30',	        '2017-11-30_18-55-56',  'Novel',
+
+'Regio',	     'CircleTrack_2017-12-14',	        '2017-12-14_12-44-54',	'Familiar'
+'Regio',	     'CircleTrack_2017-12-14',	        '2017-12-14_13-21-01',  'Novel',
+
+'Roble',	     'CircleTrack_2017-12-13',	        '2017-12-13_17-59-41',	'Familiar'
+'Roble',		   'CircleTrack_2017-12-17',	        '2017-12-17_16-20-02',  'Novel',
+
+};
+
+
+
+
+
+% 'Rio',	'Novel second trial',	'RioNovelty/2017-07-27_16-00',	'2017-08-09_17-17-45'
+% 'Rio',	'Familiar',	'2017-08-09_CircleTrack',	'2017-08-09_19-04-22'
+% 'Rio'	'bestTravelingWavesCircleTrack'	'2017-08-19_CircleTrack'	'2017-08-19_19-34-00'
+% 'Rio'	'goodTravelingWavesCircleTrack'	'2017-08-20_CircleTrack'	'2017-08-20_12-41-36'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

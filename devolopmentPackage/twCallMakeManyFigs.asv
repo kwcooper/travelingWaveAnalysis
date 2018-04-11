@@ -3,7 +3,7 @@ fprintf('\nWelcome to the Travleing Wave Project''s Multi-Rat Analysis Package!\
 %  Think of how to save the data from all rats to one struct... 
 %      load it in from one location?
 %  FLip tio's channel map
-%  nov vs fam
+%  nov vs 
 clear all;
 
 

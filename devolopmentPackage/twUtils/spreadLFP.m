@@ -7,3 +7,4 @@ end
 lfp_ = lfp/split;
 offsets = repmat([1:nElecs]',1,tPts,nSets);
 lfp_ = lfp_ + offsets;
+

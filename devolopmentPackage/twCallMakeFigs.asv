@@ -1,18 +1,16 @@
 fprintf('\nWelcome to the Travleing Wave Project''s Analysis Package!\n');
-clear all;
-%%
-% TO DO
+%To Do
 %  Add raw lfp ends to the sessions structure
-%  go through and fix poster making code
-%  add handeling for the distances
-%  Fam vs Nov plots
+% go through and fix poster making code
+% add handeling for the distances
+% 
 
-%% 
-
+clear all;
 sInd = 2; % This selects the session you want to analyze TD: add user input
 force = 1; % forces a data recalculation 
 
 sessionsList; % init sessions from the sessionsList file
+
 
 Rat =  sessions{sInd,1};
 Session =  sessions{sInd,2};

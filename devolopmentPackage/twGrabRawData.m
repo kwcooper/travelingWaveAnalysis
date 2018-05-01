@@ -31,17 +31,21 @@ rawWaves.t = t;
 %printFigure(gcf, [figData.savePath, '_',plotName,'.',figData.fig_type],'imgType',figData.fig_type);
 
 %% for poster
-
-figure;
-h = plot(t,lfpO); %axis ij;
-ax = gca;
-ax.Visible = 'off';
-set(findall(gca, 'Type', 'Line'),'LineWidth',2);
-set(h, {'color'}, flipud(num2cell(lines(size(lfpO, 1)),2))); % flip to match avgWave
 % 
+% figure;
+% h = plot(t,lfpO); %axis ij;
+% ax = gca;
+% ax.Visible = 'off';
+% set(findall(gca, 'Type', 'Line'),'LineWidth',2);
+% set(h, {'color'}, flipud(num2cell(lines(size(lfpO, 1)),2))); % flip to match avgWave
+% 
+
+end
+
+
+
 % figure;
 % x = 1:3;
 % y = [1 2 3; 42 40 34; 10 20 30];
 % h = plot(x,y);
 % set(h, {'color'}, num2cell(jet(3),2));
-end

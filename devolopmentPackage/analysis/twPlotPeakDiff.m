@@ -1,4 +1,4 @@
-function pd = twPlotPeakDiff(root, figData, plt)
+function pd = twPlotPeakDiff(root, metaData, plt)
 
 %need to filter and run through hilbert... 
 thetaPhase = root.user_def.theta_phs;
@@ -27,11 +27,11 @@ if plt % if brk move y= to after hold
   plot(x,dataShift,'o');
   hold on;
   plot(x,y);
-  title([figData.ratInfo.name ' peak offset | Slope: ' num2str(B(1))]);
+  title([metaData.Rat ' peak offset | Slope: ' num2str(B(1))]);
   %Axis: circular difrence (phase offset) and channels
   
-  plotName = [figData.ratInfo.recording '_' figData.ratInfo.name];
-  printFigure(gcf, [fullfile(figData.savePath, 'peakDiff',[plotName,'.',figData.fig_type])],'imgType',figData.fig_type);
+  plotName = [metaData.Recording '_' metaData.Rat];
+  printFigure(gcf, [fullfile(metaData.savePath, 'peakDiff',[plotName,'.',metaData.fig_type])],'imgType',metaData.fig_type);
   fprintf('Saved figure (peakDiff)\n');
 end
 

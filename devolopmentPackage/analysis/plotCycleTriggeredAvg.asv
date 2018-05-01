@@ -1,7 +1,9 @@
 function [CTA] = plotCycleTriggeredAvg(root, epochSize, figData, plt)
 
 %!! Figure out which channel to do the calculations on (Reference?)
-% TD 
+% TD add adjustments for the anatomical data. 
+
+
 % grab cycles and clean bad ones
 cycles = find(root.user_def.cycles(1,:));
 badCycles = root.user_def.cleanData_inds2cut(cycles);
@@ -17,7 +19,6 @@ root.epoch = epochs;
 root.b_myvar = root.user_def.lfp_origData'; % time across rows
 epchData = root.myvar; % this is then epoched with cmbhome
 % drop short epochs and trim long epochs until all are the same length
-keyboard;
 nSamp = cellfun(@(c) length(c), epchData,'uni',1);
 epchLength = root.user_def.lfp_fs * 2 * epochSize;
 shortEpochs = nSamp < epchLength; epchData(shortEpochs) = [];
@@ -39,8 +40,8 @@ if plt % if breaks move h = figure back to top of chunck
   plot(t,lfp_,'k'); axis ij;
   %Change axis to reflect proper channels
   
-  xlabel('Time') %!! Is this correct? or should it be phase?
-  ylabel('Channel') % !! What about the axis though...
+  xlabel('Time')
+  ylabel('Channel') % need to update to distance
   title(['Averaged Waves: ', figData.ratInfo.name])
   % ltr = text(0.02,0.98,'C','Units', 'Normalized', 'VerticalAlignment', 'Top');
   % s = ltr.FontSize;
@@ -61,15 +62,15 @@ CTA.epDat = epchData;
 root.user_def.atw = avgThetaWave';
 
 %% for poster
-h = figure;
-plot(t,lfp_); axis ij;
-%Change axis to reflect proper channels
-ax = gca;
-ax.Visible = 'off';
-set(findall(gca, 'Type', 'Line'),'LineWidth',2);
-xlabel('Time') %!! Is this correct? or should it be phase?
-ylabel('Channel') % !! What about the axis though...
-title(['Averaged Waves: ', figData.ratInfo.name])
+% h = figure;
+% plot(t,lfp_); axis ij;
+% %Change axis to reflect proper channels
+% ax = gca;
+% ax.Visible = 'off';
+% set(findall(gca, 'Type', 'Line'),'LineWidth',2);
+% xlabel('Time') %!! Is this correct? or should it be phase?
+% ylabel('Channel') % !! What about the axis though...
+% title(['Averaged Waves: ', figData.ratInfo.name])
 
 
 

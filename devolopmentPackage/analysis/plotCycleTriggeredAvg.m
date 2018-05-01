@@ -1,4 +1,4 @@
-function [CTA] = plotCycleTriggeredAvg(root, epochSize, figData, plt)
+function [CTA] = plotCycleTriggeredAvg(root, epochSize, metaData, plt)
 
 %!! Figure out which channel to do the calculations on (Reference?)
 % TD add adjustments for the anatomical data. 
@@ -19,7 +19,6 @@ root.epoch = epochs;
 root.b_myvar = root.user_def.lfp_origData'; % time across rows
 epchData = root.myvar; % this is then epoched with cmbhome
 % drop short epochs and trim long epochs until all are the same length
-keyboard;
 nSamp = cellfun(@(c) length(c), epchData,'uni',1);
 epchLength = root.user_def.lfp_fs * 2 * epochSize;
 shortEpochs = nSamp < epchLength; epchData(shortEpochs) = [];
@@ -41,17 +40,17 @@ if plt % if breaks move h = figure back to top of chunck
   plot(t,lfp_,'k'); axis ij;
   %Change axis to reflect proper channels
   
-  xlabel('Time') %!! Is this correct? or should it be phase?
-  ylabel('Channel') % !! What about the axis though...
-  title(['Averaged Waves: ', figData.ratInfo.name])
+  xlabel('Time')
+  ylabel('Channel') % need to update to distance
+  title(['Averaged Waves: ', metaData.Rat])
   % ltr = text(0.02,0.98,'C','Units', 'Normalized', 'VerticalAlignment', 'Top');
   % s = ltr.FontSize;
   % ltr.FontSize = 12;
   grid on
   
   
-  plotName = [figData.ratInfo.recording '_' figData.ratInfo.name];
-  printFigure(gcf, [fullfile(figData.savePath, 'cycTrigAvg',[plotName,'.',figData.fig_type])],'imgType',figData.fig_type);
+  plotName = [metaData.Recording '_' metaData.Rat];
+  printFigure(gcf, [fullfile(metaData.savePath, 'cycTrigAvg',[plotName,'.',metaData.fig_type])],'imgType',metaData.fig_type);
   fprintf('Saved figure (CycTrig Avg)\n');
 end
 
@@ -63,15 +62,15 @@ CTA.epDat = epchData;
 root.user_def.atw = avgThetaWave';
 
 %% for poster
-h = figure;
-plot(t,lfp_); axis ij;
-%Change axis to reflect proper channels
-ax = gca;
-ax.Visible = 'off';
-set(findall(gca, 'Type', 'Line'),'LineWidth',2);
-xlabel('Time') %!! Is this correct? or should it be phase?
-ylabel('Channel') % !! What about the axis though...
-title(['Averaged Waves: ', figData.ratInfo.name])
+% h = figure;
+% plot(t,lfp_); axis ij;
+% %Change axis to reflect proper channels
+% ax = gca;
+% ax.Visible = 'off';
+% set(findall(gca, 'Type', 'Line'),'LineWidth',2);
+% xlabel('Time') %!! Is this correct? or should it be phase?
+% ylabel('Channel') % !! What about the axis though...
+% title(['Averaged Waves: ', figData.ratInfo.name])
 
 
 

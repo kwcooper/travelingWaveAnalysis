@@ -4,12 +4,14 @@
 %      load it in from one location?
 %  ratsCompStuff 
 %  nov vs fam
+%  store all in root and load in each root per rat...?
 clear all;
 
 
 iteration = 1;
-sess2run = [1 3 5 7 9];
-%sess2run = [2 4 6 8 10];
+%sess2run = [1 3 5 7 9]; % FAM
+%sess2run = [2 4 6 8 10]; % NOV
+sess2run = [2 4 6 8 10 1 3 5 7 9];
 for i = sess2run %Select which sessions you would like to run
   
   sInd = i; % Selects the session to analyze
@@ -35,26 +37,27 @@ for i = sess2run %Select which sessions you would like to run
   
   %% Path, fetching, preprocessing
   dataPath = fullfile(ratLibPath,metaData.Rat,metaData.Session,metaData.Recording); cd(dataPath);
-  fprintf('> Changed directory\n');
+  fprintf(['> Changed directory \n']);
    
   fprintf(['\n________{ Running session ', num2str(iteration), ' of ', num2str(length(sess2run)), ' }________\n'])
-  fprintf(['Rat: ', metaData.Rat, '  Recording: ', metaData.Recording, '\n']);
+  fprintf(['Rat: ', metaData.Rat, '  Recording: ', metaData.Recording, ' ', metaData.chTxt, '\n']);
   %fprintf(['Working dir: ', workingDir(:,34:end), '\n']);
   
-  structName = [metaData.Session '_' metaData.Rat '_root.mat'];
   %Check if the data already exists
+  structName = [metaData.Session '_' metaData.Rat '_root.mat'];
   if ~force && exist(fullfile(dataPath, structName), 'file')
     fprintf('> I found an existing root object, loading it in...\n');
     foundData = load(structName);
     
     % Check if the saved data is what we think it is
     fprintf('   > Checking session names...');
+    %disp(['\n Checking', foundData.Recording, sessions{sInd,3}])
     if ~strcmp(foundData.Recording, sessions{sInd,3})
       warning('    > Imported data fields do not match requested session!\n')
       force = 1; % TD add way to move into the forced data recalculation if fields dont match.
       keyboard;
     else
-      fprintf('Checks out!\n');
+      fprintf(' Checks out!\n');
       root = foundData.root; %set
     end
   
@@ -70,63 +73,71 @@ for i = sess2run %Select which sessions you would like to run
     root = twPrepData(D,fs,metaData.ref);
     
     save(structName,'root','Recording','-v7.3');
-    fprintf('> Saving precomputed data (root) so next time is a breeze!\n');
+    fprintf('> Saving precomputed data (root object) so next time is a breeze!\n');
   end
  
-  
   
 %%
 %Grab the intra-rat struct
 ratStruct = 'ratsComp.mat';
 structPath = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave', ratStruct); 
+
+% check if struct exists, if not, create it!
 if ~exist(structPath, 'file')
-  % check if struct exists, if not, create it!
   fprintf('> No rat structure found, creating one... ');
-  ratsComp = struct;
-  save(structPath,'ratsComp','-v7.3'); 
-  fprintf('saved.\n');
-  foundStruct = load(structPath);
-  ratsComp = foundStruct.ratsComp;
-else
-  % load it back in 
-  foundStruct = load(structPath);
-  fprintf('> Loading in struct\n');
+  ratsComp = struct; save(structPath,'ratsComp','-v7.3'); fprintf('saved.\n');
+  foundStruct = load(structPath); ratsComp = foundStruct.ratsComp;
+  ratsComp.data = {}; % add cell array
+else % load it back in
+  foundStruct = load(structPath); fprintf('> Loading in struct\n');
   ratsComp = foundStruct.ratsComp;
 end
 
-
 % Add metadata to the struct
 recordingPrime = matlab.lang.makeValidName(metaData.Recording); % Session names arn't compatable
-ratsComp.ratRegress.(metaData.Rat).meta = metaData;
+%ratsComp.ratRegress.(metaData.Rat).meta = metaData;
 
 
 %% Plotting
-% Makes the average wave plot  b
-% td add argument for window width (two cycles)
+fprintf('> Running analyses \n')
+% Average Theta Wave
 epochSize = 0.100;
-
 [CTA] = plotCycleTriggeredAvg(root, epochSize, metaData, plt); 
-metaData.CTA = CTA;
+root.user_def.CTA = CTA;
 
 % Make the cross corrolation plot %Need to update this
 % twCrossCorr(root)
-pd = twPlotPeakDiff(root, metaData, plt); metaData.pd = pd;
-ratsComp.ratRegress.(metaData.Rat).(recordingPrime).pd = metaData.pd;
+
+% plots the slope of the average offset 
+% pd is a struct that holds the line of fit info
+pd = twPlotPeakDiff(root, metaData, plt); 
+root.user_def.pd = pd;
+%ratsComp.ratRegress.(metaData.Rat).(recordingPrime).pd = metaData.pd;
+
 
 %grab shifts (Degrees)
 shiftsPerChanDeg = twPhaseShift(CTA.avgThetaWave);
-ratsComp.shiftsPerChanDeg.(metaData.Rat) = shiftsPerChanDeg; 
+%ratsComp.shiftsPerChanDeg.(metaData.Rat) = shiftsPerChanDeg; 
 
 % Raw LFP: Grabs the raw data from the specified indicies
-ind1 = 650; ind2 = 750; % td Set these to the specified ends
+ind1 = 650; ind2 = 750; % td Set these to the specified ends from sessions
 [rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2, plt);
-metaData.rawWaves = rawWaves;
+%metaData.rawWaves = rawWaves;
 
-% Histogram and slope mean
+
+%%
+% update rat struct
+ratsComp.data = [ratsComp.data; {metaData.Rat, shiftsPerChanDeg, pd, metaData}];
+
+
+% Histogram and slope mean 
+% td: this needs updated for the new struct version
 %interRatExploration(ratRegress, plt)
 %%
-% save the struct
+% save intra-struct & root
+fprintf('> Saving root & intrastruct \n');
 save(structPath,'ratsComp','-v7.3'); 
+save(pwd, 'root', '-v7.3')
 iteration = iteration + 1;
 end
 

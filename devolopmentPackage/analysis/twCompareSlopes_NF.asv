@@ -59,37 +59,27 @@ for i = 1:size(ratsComp.data, 1)
   hold on;
   if i <= size(ratsComp.data, 1) / 2
     c = 'b';
-    
     SCP(end+1) = ratsComp.data{i,3}.B(1);
   else
     c = 'r';
     SAL(end+1) = ratsComp.data{i,3}.B(1);
   end
   
-  plot(ratsComp.data{i,3}.x, ratsComp.data{i,3}.dataShift,'o');
   plot(ratsComp.data{i,3}.x, ratsComp.data{i,3}.y, c);
-
 end
 title('rat theta shift: SCP (blue) vs SAL (red)')
-xlabel('Channel'); % soon to be distance
-ylabel('Offset from first channel');
+xaxis('Channel'); % soon to be distance
+yaxis('');
 
-% Need more data
-% % plot individual slope vals
-% figure; hold on;
-% plot(SCP', 'b')
-% plot(SAL', 'r')
-% title('SCP (blue) vs SAL (red) slope vals')
+% plot individual slope vals
+figure; hold on;
+plot(SCP', 'b')
+plot(SAL', 'r')
+title('SCP (blue) vs SAL (red) slope vals')
 
 % plot bar chart of the slope values
 figure;
 hb = bar([abs(mean(SCP)),abs(mean(SAL))]);
 title('average theta slope vals')
 set(gca,'xticklabel',{'SCP','SAL'})
-hb(1).FaceColor = 'b'; %hb(2).FaceColor = 'r';
-
-
-
-
-
-
+hb(1).FaceColor = 'b'; hb(1).FaceColor = 'r';

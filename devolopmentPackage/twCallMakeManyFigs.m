@@ -11,11 +11,12 @@ clear all;
 iteration = 1;
 %sess2run = [1 3 5 7 9]; % FAM
 %sess2run = [2 4 6 8 10]; % NOV
-sess2run = [2 4 6 8 10 1 3 5 7 9];
+%sess2run = [2 4 6 8 10 1 3 5 7 9]; %NOV & FAM 
+sess2run = [15 16]; % SCOP & SAL
 for i = sess2run %Select which sessions you would like to run
   
   sInd = i; % Selects the session to analyze
-  force = 0; %TD maybe save the forcing to sessions?
+  force = 1; %TD maybe save the forcing to sessions?
   plt = 0; % Generate figures?
   
   sessionsList; %import the session data  
@@ -52,7 +53,7 @@ for i = sess2run %Select which sessions you would like to run
     % Check if the saved data is what we think it is
     fprintf('   > Checking session names...');
     %disp(['\n Checking', foundData.Recording, sessions{sInd,3}])
-    if ~strcmp(foundData.Recording, sessions{sInd,3})
+    if ~strcmp(foundData.rcdng, sessions{sInd,3})
       warning('    > Imported data fields do not match requested session!\n')
       force = 1; % TD add way to move into the forced data recalculation if fields dont match.
       keyboard;
@@ -70,9 +71,8 @@ for i = sess2run %Select which sessions you would like to run
     
     fprintf('  > Prepping the data.\n')
     fprintf('    > (Cutting out bad epochs and grabbing theta cycles)\n')
-    root = twPrepData(D,fs,metaData.ref);
-    
-    save(structName,'root','Recording','-v7.3');
+    root = twPrepData(D,fs,metaData.ref); rcdng = metaData.Recording;
+    save(structName,'root','rcdng','-v7.3');
     fprintf('> Saving precomputed data (root object) so next time is a breeze!\n');
   end
  
@@ -102,7 +102,7 @@ recordingPrime = matlab.lang.makeValidName(metaData.Recording); % Session names 
 fprintf('> Running analyses \n')
 % Average Theta Wave
 epochSize = 0.100;
-[CTA] = plotCycleTriggeredAvg(root, epochSize, metaData, plt); 
+[CTA] = plotCycleTriggeredAvg(root, epochSize, metaData, 1); 
 root.user_def.CTA = CTA;
 
 % Make the cross corrolation plot %Need to update this
@@ -124,10 +124,12 @@ ind1 = 650; ind2 = 750; % td Set these to the specified ends from sessions
 [rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2, plt);
 %metaData.rawWaves = rawWaves;
 
+% compute theta asym
+[asmScores] = twComputeAsym(root);
 
 %%
 % update rat struct
-ratsComp.data = [ratsComp.data; {metaData.Rat, shiftsPerChanDeg, pd, metaData}];
+ratsComp.data = [ratsComp.data; {metaData.Rat, shiftsPerChanDeg, pd, asmScores, metaData}];
 
 
 % Histogram and slope mean 
@@ -135,9 +137,10 @@ ratsComp.data = [ratsComp.data; {metaData.Rat, shiftsPerChanDeg, pd, metaData}];
 %interRatExploration(ratRegress, plt)
 %%
 % save intra-struct & root
-fprintf('> Saving root & intrastruct \n');
+fprintf('> Saving root & intrastruct... ');
 save(structPath,'ratsComp','-v7.3'); 
 save(pwd, 'root', '-v7.3')
+fprintf('done. \n');
 iteration = iteration + 1;
 end
 

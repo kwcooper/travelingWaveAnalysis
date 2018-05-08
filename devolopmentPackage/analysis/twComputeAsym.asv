@@ -1,0 +1,11 @@
+% tw grab asymetry
+
+scores = [];
+for i = 1:size(root.b_lfp,2)
+  root.active_lfp = 1;
+  [~,~,~,asymScores] = thetaAsymmetryAnalysis(root);
+  scores(end+1) = asymScores;
+  %size(asymScores)
+end
+
+size(scores)

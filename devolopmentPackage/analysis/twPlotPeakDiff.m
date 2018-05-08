@@ -13,7 +13,6 @@ thetaPhase = root.user_def.theta_phs;
 
 [dim, chan, len] = size(dataShift);
 
-
 dataShift = cumsum([0 circDiff(dataShift',1, 'rad')]);
 
 %! make sure to adjust for all channels

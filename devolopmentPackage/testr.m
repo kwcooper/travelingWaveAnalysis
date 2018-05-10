@@ -23,7 +23,7 @@ end
 b = [b; {data, data}];
 b
 
-
-
+% make timestamps
+cumsum(repmat(1/fs,1,length(ephysRef)))
 
 

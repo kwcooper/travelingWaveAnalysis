@@ -1,10 +1,9 @@
  fprintf('\nWelcome to the Travleing Wave Project''s Multi-Rat Analysis Package!\n');
 %To Do
-%  edit rat struct
-%      load it in from one location?
-%  ratsCompStuff 
-%  nov vs fam
 %  store all in root and load in each root per rat...?
+%  add intra sesson f() after loop
+%  add time base alignment
+%      Should probably verson this package before this
 clear all;
 
 
@@ -15,7 +14,7 @@ iteration = 1;
 sess2run = [15 16]; % SCOP & SAL
 for i = sess2run %Select which sessions you would like to run
   
-  sInd = i; % Selects the session to analyze
+  sInd = i; % Selects the session to analyze 
   force = 1; %TD maybe save the forcing to sessions?
   plt = 0; % Generate figures?
   

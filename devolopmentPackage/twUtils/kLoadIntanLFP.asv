@@ -40,7 +40,7 @@ function [data,fs, fType] = loadIntanLFP(chOrd,dataPath,fnames,dsRate,recordingN
     dsStep = ceil(fs / dsRate);
     data = data(:,1:dsStep:end); fs = fs / dsStep;
     data = double(data);
-    fType = 'kwik';
+    fType
   else
     ch = 1;
     fprintf('Loading(%i): ',length(chOrd));
@@ -61,7 +61,7 @@ function [data,fs, fType] = loadIntanLFP(chOrd,dataPath,fnames,dsRate,recordingN
       tmpData = tmpData(1:dsStep:end); % downsample
       %keyboard; 
       data(ch,:) = tmpData'; %k throws error, allocating may be off
-     fType = 'openephys'; 
+      
     end
     fprintf('\n');
   end

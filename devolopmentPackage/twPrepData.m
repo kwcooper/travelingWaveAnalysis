@@ -1,12 +1,44 @@
- function root = twPrepData(D,fs,refCh)
-%FUNCTION TWPREPDATA %cleans and extracts useful properties of the data
+ function root = twPrepData(D,fs,metaData)
+%FUNCTION TWPREPDATA %cleans and extracts useful properties of the data 
+% as well as creates the root object with tracking data
 %Part of the Traveling Wave Analysis package
 
+%% grab tracking data: code adapted from invivoimport 180516
+twalignDataTimebase(animalID,prefixes,[],[],ref,fType); % make position file
 
-% create root object for use in epoching 
+pos_file = fullfile( ,'alignedPositionData.csv'); 
+ephys_align = fullfile( ,'alignedEphysData.mat');
+
+% dacq_pos_3p for 3 LEDs, dacq_pos for 2 LEDs
+[scaleFactor, vid_ts, vid_x, vid_y, vid_headdir, d_epoch] = dacq_pos_3p(pos_file);
+scaleFactor = 115/800; % CHANGE FOR PROJECT, make variable
+
+% create root object 
 nSamp = size(D,2);
 b_ts = linspace(0,nSamp/fs,nSamp+1); b_ts = b_ts(2:end); % cut off first to get rid of 0
-root = CMBHOME.Session('name','experiment1','epoch',[-inf inf],'b_ts',b_ts,'fs_video',fs);
+root = CMBHOME.Session('name',...
+                       'experiment1',...
+                       'epoch', [-inf inf],...
+                       'b_ts',b_ts,...
+                       'fs_video',fs...
+                       'b_x', vid_x, ...
+                       'b_y', vid_y, ...
+                       'raw_pos', 1, ...
+                       'raw_headdir', 1, ...
+                       'b_headdir', vid_headdir, ...
+                       'date_created', now, ...
+                       'epoch', [-inf inf], ...
+                       'fs_video', 1/mean(diff(vid_ts)), ...
+                       'spatial_scale',scaleFactor);
+
+
+
+
+
+
+
+
+%%
 % store useful data in root
 root.user_def.lfp_origData = D;
 root.user_def.lfp_fs = fs;
@@ -19,8 +51,8 @@ end
 
 % clean data and filter to epochs of good theta
 %filtType = 'thetaDeltaRatio'; filtParams = 2; % works okay, some fine tuning may help further rule out low theta epochs and include 
-filtType = 'thetaMag'; filtParams = [115 1000]  ; % works okay, some fine tuning may help further rule out low theta epochs and include 
-[pctDataUsed,inds2cut] = cleanData_Intan(D(refCh,:),fs,filtType,filtParams); 
+filtType = 'thetaMag'; filtParams = [115 1000]  ;  
+[pctDataUsed,inds2cut] = cleanData_Intan(D(metaData.ref,:),fs,filtType,filtParams); 
 root.user_def.cleanData_inds2cut = inds2cut;
 root.user_def.cleanData_pctDataUsed = pctDataUsed;
 

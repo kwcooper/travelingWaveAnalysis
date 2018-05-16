@@ -27,7 +27,8 @@ for i = sess2run %Select which sessions you would like to run
   metaData.chTxt = sessions{sInd,4};
   metaData.chOrd = sessions{sInd,5};
   metaData.ref = sessions{sInd,6};
-  metaData.badEnds = sessions{sInd,7};
+  metaData.trackRef = sessions{sInd,7};
+  metaData.badEnds = sessions{sInd,8};
   
   metaData.saveFig = 1; 
   metaData.figDir = 'twImgDir'; 
@@ -66,11 +67,11 @@ for i = sess2run %Select which sessions you would like to run
     fnames = dir(fullfile(dataPath,'100_CH*.continuous'));
     fprintf('  > Fetching the lfp.\n')
     fprintf('(This may take some time)...\n')
-    [D, fs] = kLoadIntanLFP(metaData.chOrd,dataPath,fnames);
-    
+    [D, fs, fType] = kLoadIntanLFP(metaData.chOrd,dataPath,fnames);
+    metadata.fType = fType;
     fprintf('  > Prepping the data.\n')
     fprintf('    > (Cutting out bad epochs and grabbing theta cycles)\n')
-    root = twPrepData(D,fs,metaData.ref); rcdng = metaData.Recording;
+    root = twPrepData(D,fs,metaData); rcdng = metaData.Recording;
     save(structName,'root','rcdng','-v7.3');
     fprintf('> Saving precomputed data (root object) so next time is a breeze!\n');
   end

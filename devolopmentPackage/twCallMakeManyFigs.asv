@@ -1,10 +1,9 @@
  fprintf('\nWelcome to the Travleing Wave Project''s Multi-Rat Analysis Package!\n');
 %To Do
-%  edit rat struct
-%      load it in from one location?
-%  ratsCompStuff 
-%  nov vs fam
 %  store all in root and load in each root per rat...?
+%  add intra sesson f() after loop
+%  add time base alignment
+%      Should probably verson this package before this
 clear all;
 
 
@@ -15,7 +14,7 @@ iteration = 1;
 sess2run = [15 16]; % SCOP & SAL
 for i = sess2run %Select which sessions you would like to run
   
-  sInd = i; % Selects the session to analyze
+  sInd = i; % Selects the session to analyze 
   force = 1; %TD maybe save the forcing to sessions?
   plt = 0; % Generate figures?
   
@@ -28,7 +27,8 @@ for i = sess2run %Select which sessions you would like to run
   metaData.chTxt = sessions{sInd,4};
   metaData.chOrd = sessions{sInd,5};
   metaData.ref = sessions{sInd,6};
-  metaData.badEnds = sessions{sInd,7};
+  metaData.trackRef = sessions{sInd,7};
+  metaData.badEnds = sessions{sInd,8};
   
   metaData.saveFig = 1; 
   metaData.figDir = 'twImgDir'; 
@@ -53,7 +53,7 @@ for i = sess2run %Select which sessions you would like to run
     % Check if the saved data is what we think it is
     fprintf('   > Checking session names...');
     %disp(['\n Checking', foundData.Recording, sessions{sInd,3}])
-    if ~strcmp(foundData.Recording, sessions{sInd,3})
+    if ~strcmp(foundData.rcdng, sessions{sInd,3})
       warning('    > Imported data fields do not match requested session!\n')
       force = 1; % TD add way to move into the forced data recalculation if fields dont match.
       keyboard;
@@ -67,13 +67,14 @@ for i = sess2run %Select which sessions you would like to run
     fnames = dir(fullfile(dataPath,'100_CH*.continuous'));
     fprintf('  > Fetching the lfp.\n')
     fprintf('(This may take some time)...\n')
-    [D, fs] = kLoadIntanLFP(metaData.chOrd,dataPath,fnames);
+    [D, fs, fType] = kLoadIntanLFP(metaData.chOrd,dataPath,fnames);
+    metadata.fType = fType;
     
+    % prepData function, makes root, grabs tracking, and minor theta computations
     fprintf('  > Prepping the data.\n')
-    fprintf('    > (Cutting out bad epochs and grabbing theta cycles)\n')
-    root = twPrepData(D,fs,metaData.ref);
-    
-    save(structName,'root','metaDaRecording','-v7.3');
+    %fprintf('    > (Cutting out bad epochs and grabbing theta cycles)\n')
+    root = twPrepData(D,fs,metaData); rcdng = metaData.Recording;
+    save(structName,'root','rcdng','-v7.3');
     fprintf('> Saving precomputed data (root object) so next time is a breeze!\n');
   end
  
@@ -103,7 +104,7 @@ recordingPrime = matlab.lang.makeValidName(metaData.Recording); % Session names 
 fprintf('> Running analyses \n')
 % Average Theta Wave
 epochSize = 0.100;
-[CTA] = plotCycleTriggeredAvg(root, epochSize, metaData, plt); 
+[CTA] = plotCycleTriggeredAvg(root, epochSize, metaData, 1); 
 root.user_def.CTA = CTA;
 
 % Make the cross corrolation plot %Need to update this
@@ -125,10 +126,12 @@ ind1 = 650; ind2 = 750; % td Set these to the specified ends from sessions
 [rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2, plt);
 %metaData.rawWaves = rawWaves;
 
+% compute theta asym
+[asmScores] = twComputeAsym(root);
 
 %%
 % update rat struct
-ratsComp.data = [ratsComp.data; {metaData.Rat, shiftsPerChanDeg, pd, metaData}];
+ratsComp.data = [ratsComp.data; {metaData.Rat, shiftsPerChanDeg, pd, asmScores, metaData}];
 
 
 % Histogram and slope mean 
@@ -136,10 +139,14 @@ ratsComp.data = [ratsComp.data; {metaData.Rat, shiftsPerChanDeg, pd, metaData}];
 %interRatExploration(ratRegress, plt)
 %%
 % save intra-struct & root
-fprintf('> Saving root & intrastruct \n');
+fprintf('> Saving root & intrastruct... ');
 save(structPath,'ratsComp','-v7.3'); 
 save(pwd, 'root', '-v7.3')
+fprintf('done. \n');
 iteration = iteration + 1;
 end
+
+% add post single rat computations here
+
 
 fprintf('\nfin \n');

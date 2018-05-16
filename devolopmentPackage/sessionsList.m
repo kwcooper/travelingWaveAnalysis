@@ -1,4 +1,4 @@
-
+%function [sessions] = sessionsList()
 %% Contains ephys file information, as well as channel mappings, and good epoch data
 % as per the 4-10 spreadsheet update, includes only the famVNov
 
@@ -22,7 +22,7 @@ sessions = {...
 'Romo',		     'CircleTrack_2017-12-03',	        '2017-12-03_15-37-55',  'Sal',        [10 13 12 6 7 2 3],         1, 20, [];... 
  };
 
-
+%end
 
 % % novel vs familiar sessions
 % sessions = {...

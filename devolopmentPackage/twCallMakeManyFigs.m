@@ -1,4 +1,4 @@
- fprintf('\nWelcome to the Travleing Wave Project''s Multi-Rat Analysis Package!\n');
+ fprintf('\nTravleing Wave Project''s Multi-Rat Analysis Package\n');
 %To Do
 %  store all in root and load in each root per rat...?
 %  add intra sesson f() after loop
@@ -12,6 +12,7 @@ iteration = 1;
 %sess2run = [2 4 6 8 10]; % NOV
 %sess2run = [2 4 6 8 10 1 3 5 7 9]; %NOV & FAM 
 sess2run = [15 16]; % SCOP & SAL
+sess2run = [1];
 for i = sess2run %Select which sessions you would like to run
   
   sInd = i; % Selects the session to analyze 
@@ -68,9 +69,11 @@ for i = sess2run %Select which sessions you would like to run
     fprintf('  > Fetching the lfp.\n')
     fprintf('(This may take some time)...\n')
     [D, fs, fType] = kLoadIntanLFP(metaData.chOrd,dataPath,fnames);
-    metadata.fType = fType;
-    fprintf('  > Prepping the data.\n')
-    fprintf('    > (Cutting out bad epochs and grabbing theta cycles)\n')
+    metaData.fType = fType;
+    
+    % prepData: makes root, grabs tracking, and minor theta computations
+    fprintf('  > Prepping data.\n')
+    %fprintf('    > (Cutting out bad epochs and grabbing theta cycles)\n')
     root = twPrepData(D,fs,metaData); rcdng = metaData.Recording;
     save(structName,'root','rcdng','-v7.3');
     fprintf('> Saving precomputed data (root object) so next time is a breeze!\n');
@@ -143,5 +146,8 @@ save(pwd, 'root', '-v7.3')
 fprintf('done. \n');
 iteration = iteration + 1;
 end
+
+% add post single rat computations here
+
 
 fprintf('\nfin \n');

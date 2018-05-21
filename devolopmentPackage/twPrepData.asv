@@ -3,23 +3,30 @@
 % as well as creates the root object with tracking data
 %Part of the Traveling Wave Analysis package
 keyboard;
-%% grab tracking data: code adapted from invivoimport 180516
-twalignDataTimebase(metaData.Rat, {metaData.Session}, metaData.Recording,[],[],metaData.trackRef,metaData.fType); % make position file
 
+% TD: 
+%     why is so much data being cut from tracking function?
+
+
+%% grab tracking data
+twalignDataTimebase(metaData.Rat, {metaData.Session}, metaData.Recording,[],[],metaData.trackRef,metaData.fType); % make position file
+%code adapted from invivoimport ~line 149 on 180516
 pos_file = fullfile(ratLibPath,metaData.Rat,metaData.Session,'alignedPositionData.csv'); 
 ephys_align = fullfile(ratLibPath,metaData.Rat,metaData.Session,'alignedEphysData.mat');
 
-% dacq_pos_3p for 3 LEDs, dacq_pos for 2 LEDs
+% dacq_pos_3p for 3 LEDs, dacq_pos for 2 LEDs 
+% both files seem to return similar output data on Tio session 1
 [scaleFactor, vid_ts, vid_x, vid_y, vid_headdir, d_epoch] = dacq_pos_3p(pos_file);
-scaleFactor = 115/800; % CHANGE FOR PROJECT, make variable
+scaleFactor = 115/800; % S- CHANGE FOR PROJECT, make variable % k- these are also the same 
 
 % create root object 
 nSamp = size(D,2);
+
+% this has been changed to vid_ts; will add to userdef instead
 b_ts = linspace(0,nSamp/fs,nSamp+1); b_ts = b_ts(2:end); % cut off first to get rid of 0
-root = CMBHOME.Session('name',...
-                       'experiment1',...
+root = CMBHOME.Session('name', metaData.Rat,...
                        'epoch', [-inf inf],...
-                       'b_ts', b_ts,...
+                       'b_ts', vid_ts,... % as per invivoimport line 154
                        'fs_video', fs, ...
                        'b_x', vid_x, ...
                        'b_y', vid_y, ...
@@ -31,18 +38,14 @@ root = CMBHOME.Session('name',...
                        'fs_video', 1/mean(diff(vid_ts)), ...
                        'spatial_scale',scaleFactor);
 
-
-
-
-
-
-
-
 %%
 % store useful data in root
 root.user_def.lfp_origData = D;
 root.user_def.lfp_fs = fs;
+root.user_def.b_ts = b_ts; 
+root.user_def.metaData = metaData;
 
+% add lfp to root, channel by channel
 for i = 1:size(D,1)
   root.b_lfp(i).signal = root.user_def.lfp_origData(i,:)'; 
   root.b_lfp(i).fs = root.user_def.lfp_fs; 

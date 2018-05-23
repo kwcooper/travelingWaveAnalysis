@@ -1,4 +1,4 @@
-function twalignDataTimebase(ratName,prefixes,ephysFolder,bonsaiTime,ref,filetype)
+function twalignDataTimebase(ratName,prefixes,Recording,ephysFolder,bonsaiTime,ref,filetype)
 % alignDataTimebase(ratName,prefixes,tet2save)
 %
 %   Aligns timestamps collected from Bonsai and Open Ephys to align the tracking data to the EEG.
@@ -27,10 +27,10 @@ for iP = 1:length(prefixes)
   %%%%BSC 170215 - if the final file resulting from this function already
   %exists, then the function has already been run on this session, so go
   %to the next session in prefixes
-  if exist([basePath filesep 'alignedEphysData.m'],'file')
-    disp(['skipping ' prefixes{iP} ' - this session has already been aligned'])
-    continue
-  end
+%   if exist([basePath filesep 'alignedEphysData.mat'],'file')
+%     disp(['skipping ' prefixes{iP} ' - this session has already been aligned'])
+%     continue
+%   end
   %%%%
   
   % Prompt if multiple bonsai files are found
@@ -50,16 +50,27 @@ for iP = 1:length(prefixes)
   posFile = dir([basePath filesep 'tracking' bonsaiTime{iP} '.csv']); % ELN & BSC 170125
   posFile = [basePath filesep posFile.name];
   
-  % SJV 170706 added option to read in open ephys for ECube. changed input parameters to alignVideo2LFP
+  % SJV 170706 added option to read in open ephys for ECube. 
+  % changed input parameters to alignVideo2LFP
   % Prompt if multiple ephys folders
   if isempty(ephysFolder{iP})
     folderList = CollectFolders(basePath);
     ind = 1;
     if length(folderList)>1
-      for iF = 1:length(folderList)
-        disp([num2str(iF) ': ' folderList{iF}]);
+      % kwc add flag for prompting vs automation
+      if 0
+        for iF = 1:length(folderList)
+          disp([num2str(iF) ': ' folderList{iF}]);
+        end
+        ind = input('Enter index of Open Ephys folder: ');
+      else
+        for iF = 1:length(folderList)
+          if folderList{iF}(length(folderList{iF})-length(Recording)+1:end) == Recording
+            ind = iF;
+          end
+        end
       end
-      ind = input('Enter index of Open Ephys folder: ');
+      
     end
     ephysFolder{iP} = folderList{ind}(length(basePath)+2:end);
   end
@@ -69,8 +80,8 @@ for iP = 1:length(prefixes)
       ephysFile = dir([basePath filesep ephysFolder{iP} filesep '*.kwd']);
       ephysFile = [ephysFile.folder filesep ephysFile.name];
       ephysRef = h5read(ephysFile,'/recordings/0/data',[ref 1],[1 inf]);
-      fs = h5readatt(ephysFile,'/recordings/0/','sample_rate');
-      ephysTS = cumsum(repmat(1/fs,1,length(ephysRef))); % KWC 180510
+      fs = double(h5readatt(ephysFile,'/recordings/0/','sample_rate'));
+      ephysTS = [1:length(ephysRef)]./fs; % KWC 180510
     case 'openephys'
       reference = dir([basePath filesep ephysFolder{iP} filesep '*_ADC' num2str(ref) '.continuous']); 
       if isempty(reference), reference = dir([basePath filesep ephysFolder{iP} filesep '*_PDI' num2str(ref) '.continuous']); end
@@ -83,6 +94,7 @@ for iP = 1:length(prefixes)
   bonsaiData = dlmread(bonsaiFile,' '); 
   bonsaiData(:,end) = [];
   
+  fprintf('Computing time lag between recording and tracking... ');
   % 170824 SJV calculating a rough estimate of the time lag between the two
   % recordings using the file time stamps. This way the lags in the cross
   % correlation will be sure to include the time lag while also not having
@@ -142,7 +154,7 @@ for iP = 1:length(prefixes)
   % point recorded by open ephys I'm saving the start time here so we can 
   % account for this offset later when loading inthe spike waveforms.
   starttime = ephysTS(1); 
-  
+  fprintf('Done!\nSaving work to data directory.\n');
   save([basePath filesep 'alignedEphysData.mat'],'goodInds','timestamps','offset','starttime');  
 end
 
@@ -223,9 +235,19 @@ spk_sb = ts_sb(diff(sb_)>0);
 spk_se =  ts_se(diff(se_)>0);
 
 % get cross correlation of "spike" times
-[r,lag] = CMBHOME.Spike.CrossCorr(spk_se,'ts2',spk_sb,'binsize',0.008,'lag',lags);
-[~,m] = max(r);
+[r,lag] = CMBHOME.Spike.CrossCorr(spk_se,'ts2',spk_sb,'binsize',0.02,'lag',1.2*lags);
+[maxVal,m] = max(r);
 offset = lag(m);
+
+
+figure;
+subplot(3,1,1); plot(lag,r); hold on; plot(offset,maxVal,'*');
+subplot(3,1,2); i = 2; 
+plot(ts_sb(ts_sb>=(i-1)+offset&ts_sb<(i-1)+10+offset),sb_(ts_sb>=(i-1)+offset&ts_sb<(i-1)+10+offset));
+axis([i-1+offset (i-1)+10+offset 0 1.5])
+subplot(3,1,3);
+plot(ts_se(ts_se>=(i-1)&ts_se<(i-1)+10),se_(ts_se>=(i-1)&ts_se<(i-1)+10));
+axis([i-1 (i-1)+10 0 1.5]);
 
 if 0
   figure;

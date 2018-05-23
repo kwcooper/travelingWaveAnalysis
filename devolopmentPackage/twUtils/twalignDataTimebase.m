@@ -27,10 +27,10 @@ for iP = 1:length(prefixes)
   %%%%BSC 170215 - if the final file resulting from this function already
   %exists, then the function has already been run on this session, so go
   %to the next session in prefixes
-  if exist([basePath filesep 'alignedEphysData.mat'],'file')
-    disp(['skipping ' prefixes{iP} ' - this session has already been aligned'])
-    continue
-  end
+%   if exist([basePath filesep 'alignedEphysData.mat'],'file')
+%     disp(['skipping ' prefixes{iP} ' - this session has already been aligned'])
+%     continue
+%   end
   %%%%
   
   % Prompt if multiple bonsai files are found
@@ -80,8 +80,8 @@ for iP = 1:length(prefixes)
       ephysFile = dir([basePath filesep ephysFolder{iP} filesep '*.kwd']);
       ephysFile = [ephysFile.folder filesep ephysFile.name];
       ephysRef = h5read(ephysFile,'/recordings/0/data',[ref 1],[1 inf]);
-      fs = h5readatt(ephysFile,'/recordings/0/','sample_rate');
-      ephysTS = cumsum(repmat(1/fs,1,length(ephysRef))); % KWC 180510
+      fs = double(h5readatt(ephysFile,'/recordings/0/','sample_rate'));
+      ephysTS = [1:length(ephysRef)]./fs; % KWC 180510
     case 'openephys'
       reference = dir([basePath filesep ephysFolder{iP} filesep '*_ADC' num2str(ref) '.continuous']); 
       if isempty(reference), reference = dir([basePath filesep ephysFolder{iP} filesep '*_PDI' num2str(ref) '.continuous']); end
@@ -235,9 +235,21 @@ spk_sb = ts_sb(diff(sb_)>0);
 spk_se =  ts_se(diff(se_)>0);
 
 % get cross correlation of "spike" times
-[r,lag] = CMBHOME.Spike.CrossCorr(spk_se,'ts2',spk_sb,'binsize',0.008,'lag',lags);
-[~,m] = max(r);
+[r,lag] = CMBHOME.Spike.CrossCorr(spk_se,'ts2',spk_sb,'binsize',0.02,'lag',1.2*lags);
+[maxVal,m] = max(r);
 offset = lag(m);
+
+if 0
+  % plots each of the spikes along with the xcorr
+  figure;
+  subplot(3,1,1); plot(lag,r); hold on; plot(offset,maxVal,'*');
+  subplot(3,1,2); i = 2;
+  plot(ts_sb(ts_sb>=(i-1)+offset&ts_sb<(i-1)+10+offset),sb_(ts_sb>=(i-1)+offset&ts_sb<(i-1)+10+offset));
+  axis([i-1+offset (i-1)+10+offset 0 1.5])
+  subplot(3,1,3);
+  plot(ts_se(ts_se>=(i-1)&ts_se<(i-1)+10),se_(ts_se>=(i-1)&ts_se<(i-1)+10));
+  axis([i-1 (i-1)+10 0 1.5]);
+end
 
 if 0
   figure;

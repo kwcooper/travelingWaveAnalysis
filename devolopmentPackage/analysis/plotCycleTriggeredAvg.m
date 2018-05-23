@@ -3,7 +3,7 @@ function [CTA] = plotCycleTriggeredAvg(root, epochSize, metaData, plt)
 %!! Figure out which channel to do the calculations on (Reference?)
 % TD add adjustments for the anatomical data. 
 
-
+keyboard;
 % grab cycles and clean bad ones
 cycles = find(root.user_def.cycles(1,:));
 badCycles = root.user_def.cleanData_inds2cut(cycles);

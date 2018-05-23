@@ -11,16 +11,14 @@ freqList = {[1 4], [6 12], [10 25], [25 60], [60 120]};
 freqNames = {'dl', 'th', 'bt', 'lg', 'mg'};
 theta = [freqList{2}];
 
-figure;
-suptitle('Freq Bands')
+figure; suptitle('Freq Bands')
 for i = 1:size(freqList,2)
   subplot(size(freqList,2),1,i)
   plot(buttfilt(dSamp,freqList{i},fs,'bandpass',3))
   title(freqNames{i})
 end
 
-figure;
-suptitle('Hilbert')
+figure; suptitle('Hilbert')
 for i = 1:size(freqList,2)
   subplot(size(freqList,2),1,i)
   plot(abs(hilbert(buttfilt(dSamp,freqList{i},fs,'bandpass',3))))
@@ -74,6 +72,7 @@ figure; plot(fHz(1:ceil(length(data)/2)), yPow)
  
  % grab pow for all samples
  data = D(1,1:700000);
+ %data = buttfilt(D(1,1:700000),[25 60],fs,'bandpass',3);
 
  wSize = fs;
  w = floor(size(data,2) / wSize);
@@ -87,7 +86,7 @@ figure; plot(fHz(1:ceil(length(data)/2)), yPow)
  fHz = (0:(w-1)) * fs / w;
  %figure; plot(fHz(1:100),freqPow)
  figure; imagesc(freqPow)
-title('PSD: Tio'); xlabel('Time (s)'); ylabel('Hz');
+ title('PSD: Tio'); xlabel('Time (s)'); ylabel('Hz');
 
 %% graveyard
 

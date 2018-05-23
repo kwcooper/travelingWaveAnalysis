@@ -38,7 +38,7 @@ figure; plot(f,abs(fft(dSamp)))
 
 
 data = buttfilt(dSamp(1:1000),[6 20],fs,'bandpass',3);
-data = dSamp(1:100);
+data = dSamp(1:1000);
 % in hz
 % magnitude
 fHz = (0:(length(data)-1)) * fs / length(data);
@@ -52,9 +52,10 @@ yPow = 10*log10(Y(1:ceil(length(data)/2)));
 figure; plot(fHz(1:ceil(length(data)/2)), yPow)
 
 %%
-% grab mag for all samples
-data = dSamp;
 
+
+% grab mag for all samples
+ data = dSamp;
  maxFreq = 100;
  wSize = 100;
  w = floor(size(data,2) / wSize);
@@ -65,26 +66,29 @@ data = dSamp;
    freqMag(:,id) = Y;
    id = id + 1;
  end
-
  figure; plot(fHz,freqMag)
  figure; imagesc(freqMag/max(freqMag))
 
-% grab pow for all samples
-data = D;
+ 
+ 
+ 
+ % grab pow for all samples
+ data = D(1,1:700000);
+ buttfilt(dSamp,freqList{i},fs,'bandpass',3)
 
- wSize = 1000;
+ wSize = fs;
  w = floor(size(data,2) / wSize);
- freqPow = nan(w/2, w); 
+ freqPow = nan(100, w); 
  id = 1;
  for i = 1:wSize:size(data,2)
    yPow = 10*log10(abs(fft(data(i:i+wSize-1))))';
-   freqPow(:,id) = yPow(1:w/2);
+   freqPow(:,id) = yPow(1:100);
    id = id + 1;
  end
-
- figure; plot(fHz,freqPow)
- figure; imagesc(freqPow/max(freqPow))
-
+ fHz = (0:(w-1)) * fs / w;
+ %figure; plot(fHz(1:100),freqPow)
+ figure; imagesc(freqPow)
+title('PSD: Tio'); xlabel('Time (s)'); ylabel('Hz');
 
 %% graveyard
 

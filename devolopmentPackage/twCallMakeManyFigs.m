@@ -122,6 +122,10 @@ root.user_def.pd = pd;
 shiftsPerChanDeg = twPhaseShift(CTA.avgThetaWave);
 %ratsComp.shiftsPerChanDeg.(metaData.Rat) = shiftsPerChanDeg; 
 
+% plot PSD
+% right now we are looking at only one of the channels
+plotPSD(root.lfp.signal(1,1:100000),root)
+
 % Raw LFP: Grabs the raw data from the specified indicies
 ind1 = 650; ind2 = 750; % td Set these to the specified ends from sessions
 [rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2, plt);

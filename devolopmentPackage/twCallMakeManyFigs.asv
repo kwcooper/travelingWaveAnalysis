@@ -101,8 +101,10 @@ recordingPrime = matlab.lang.makeValidName(metaData.Recording); % Session names 
 %ratsComp.ratRegress.(metaData.Rat).meta = metaData;
 
 
-%% Plotting
+%% Analysis
 fprintf('> Running analyses \n')
+
+
 % Average Theta Wave
 epochSize = 0.100;
 [CTA] = plotCycleTriggeredAvg(root, epochSize, metaData, 1); 
@@ -115,12 +117,9 @@ root.user_def.CTA = CTA;
 % pd is a struct that holds the line of fit info
 pd = twPlotPeakDiff(root, metaData, plt); 
 root.user_def.pd = pd;
-%ratsComp.ratRegress.(metaData.Rat).(recordingPrime).pd = metaData.pd;
-
 
 %grab shifts (Degrees)
 shiftsPerChanDeg = twPhaseShift(CTA.avgThetaWave);
-%ratsComp.shiftsPerChanDeg.(metaData.Rat) = shiftsPerChanDeg; 
 
 % plot PSD
 % right now we are looking at only one of the channels
@@ -129,10 +128,15 @@ plotPSD(root.lfp.signal(1,1:100000),root)
 % Raw LFP: Grabs the raw data from the specified indicies
 ind1 = 650; ind2 = 750; % td Set these to the specified ends from sessions
 [rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2, plt);
-%metaData.rawWaves = rawWaves;
 
 % compute theta asym
 [asmScores] = twComputeAsym(root);
+
+% compute theta speed modulation
+[thetaSpdMod_R] = thetaSpdAnalysis(root, chans);
+
+% psd plot: need to pick a channel
+%[psd] = plotPSD(,fs,tText);
 
 %%
 % update rat struct
@@ -151,7 +155,7 @@ fprintf('done. \n');
 iteration = iteration + 1;
 end
 
-% add post single rat computations here
+% add multi rat computations here
 
 
 fprintf('\nfin \n');

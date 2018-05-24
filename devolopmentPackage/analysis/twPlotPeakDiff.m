@@ -1,6 +1,5 @@
 function pd = twPlotPeakDiff(root, metaData, plt)
 
-% need to filter and run through hilbert... 
 thetaPhase = root.user_def.theta_phs;
 
 %Finds the circular difference (currently just for the first chan to save time)

@@ -1,4 +1,4 @@
-function [] = plotPSD(data,fs,tText)
+function [freqPow] = plotPSD(data,fs,tText)
 %  plots the Power spectral Density over windows of data
 %  (FFT over windows of data)
 %

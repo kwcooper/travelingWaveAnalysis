@@ -12,7 +12,7 @@
 % original script to align tracking, make root, and build fnamesets
 %importDataWTrackingAuto(metaData)
 
-% ... this should be changed maybe? (I automated it)
+% ... this should be changed? (I automated it)
 twalignDataTimebase(metaData.Rat, {metaData.Session}, metaData.Recording,[],[],metaData.trackRef,metaData.fType); % make position file
 
 %code adapted from invivoimport ~line 149 on 180516
@@ -23,14 +23,13 @@ pos_file = fullfile(ratLibPath,metaData.Rat,metaData.Session,'alignedPositionDat
 [scaleFactor, vid_ts, vid_x, vid_y, vid_headdir, d_epoch] = dacq_pos_3p(pos_file);
 scaleFactor = 115/800; % S- CHANGE FOR PROJECT, make variable % k- these are also the same 
 
-% create root object  
-nSamp = size(D,2);                                                                                                                                                                                                
-% this has been changed to vid_ts; will add to userdef instead
-b_ts = linspace(0,nSamp/fs,nSamp+1); b_ts = b_ts(2:end)'; % cut off first to get rid of 0
+% make lfp timestamps
+b_ts = linspace(0,size(D,2)/fs,size(D,2)+1); b_ts = b_ts(2:end)'; % cut off first to get rid of 0
 
-% need to work on video timestamps... 
-% calculate new stamps with mean of current, interpolate with the output
-% stamps 
+% !! need to work on video timestamps... 
+% calculate new stamps with mean of current, interpolate with the output stamps
+vid_ts_floor = floor(1/mean(diff(vid_ts)));
+
 
 root = CMBHOME.Session('name', metaData.Rat,...
                        'epoch', [-inf inf],...
@@ -54,7 +53,6 @@ load(ephys_align,'timestamps','offset','starttime');
 % store useful data in root
 root.user_def.lfp_origData = D;
 root.user_def.lfp_fs = fs;
-root.user_def.b_ts = b_ts; 
 root.user_def.metaData = metaData;
 
 for i = 1:size(D,1)
@@ -85,9 +83,9 @@ for i = 1:size(D,1)
   [cycles(i,:),~] = parseThetaCycles(thetaPhs(i,:),fs,[6 10]);
 end
 
-  root.user_def.theta_phs = thetaPhs;
-  root.user_def.theta_amp = thetaAmp;
-  root.user_def.cycles = cycles;
+root.user_def.theta_phs = thetaPhs;
+root.user_def.theta_amp = thetaAmp;
+root.user_def.cycles = cycles;
 
 end
   

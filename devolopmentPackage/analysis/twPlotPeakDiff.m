@@ -1,4 +1,7 @@
 function pd = twPlotPeakDiff(root, metaData, plt)
+% Runs a linear regression through peak offset points; plots 
+
+% TD: change axis to mm 
 
 thetaPhase = root.user_def.theta_phs;
 

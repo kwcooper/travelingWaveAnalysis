@@ -3,14 +3,13 @@ function [CTA] = plotCycleTriggeredAvg(root, epochSize, metaData, plt)
 %!! Figure out which channel to do the calculations on (Reference?)
 % TD add adjustments for the anatomical data. 
 
-keyboard;
 % grab cycles and clean bad ones
 cycles = find(root.user_def.cycles(1,:));
 badCycles = root.user_def.cleanData_inds2cut(cycles);
 cycles(badCycles) = [];
 
-
-cycleTs=root.b_ts(cycles); %finds all theta cycles
+% ud 180528: changed root.b_ts to lfp ts after addition of tracking data.  
+cycleTs=root.b_lfp(1).ts(cycles); %finds all theta cycles
 % finds bad theta cycles
 %epochSize = 0.100; %sets epoch size (moved to function argument)
 epochs = [cycleTs-epochSize cycleTs+epochSize]; % grabs epochs 

@@ -1,9 +1,15 @@
  fprintf('\nTravleing Wave Project''s Multi-Rat Analysis Package\n');
-%To Do
-%  store all in root and load in each root per rat...?
-%  add intra sesson f() after loop
-%  add time base alignment
-%      Should probably verson this package before this
+
+ %To Do
+% 1. tracking with multiple rats
+% 2. double check root objects
+% 3. fix/add figure saving 
+% 4. confirm references/tracking
+% 5. build slope vs velocity function
+% 6. check timestamps
+% 7. check slope gathering functions
+% 8. check 
+
 clear all;
 
 
@@ -130,9 +136,10 @@ ind1 = 650; ind2 = 750; % td Set these to the specified ends from sessions
 [rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2, plt);
 
 % compute theta asym
-[asmScores] = twComputeAsym(root);
+%[asmScores] = twComputeAsym(root);
 
 % compute theta speed modulation
+chans = root.user_def.metaData.chOrd;
 [thetaSpdMod_R] = thetaSpdAnalysis(root, chans);
 
 % psd plot: need to pick a channel

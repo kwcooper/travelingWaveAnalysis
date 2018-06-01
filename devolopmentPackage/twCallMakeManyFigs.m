@@ -16,13 +16,14 @@ clear all;
 iteration = 1;
 %sess2run = [1 3 5 7 9]; % FAM
 %sess2run = [2 4 6 8 10]; % NOV
-%sess2run = [2 4 6 8 10 1 3 5 7 9]; %NOV & FAM 
-sess2run = [15 16]; % SCOP & SAL
-sess2run = [1];
+sess2run = [2 4 6 8 10 1 3 5 7 9]; %NOV & FAM 
+%sess2run = [15 16]; % SCOP & SAL
+%sess2run = [1];
+tic
 for i = sess2run %Select which sessions you would like to run
   
   sInd = i; % Selects the session to analyze 
-  force = 1; %TD maybe save the forcing to sessions?
+  force = 0; %TD maybe save the forcing to sessions?
   plt = 0; % Generate figures?
   
   sessionsList; %import the session data  
@@ -35,7 +36,8 @@ for i = sess2run %Select which sessions you would like to run
   metaData.chOrd = sessions{sInd,5};
   metaData.ref = sessions{sInd,6};
   metaData.trackRef = sessions{sInd,7};
-  metaData.badEnds = sessions{sInd,8};
+  metaData.filtParams = sessions{sInd, 8};
+  metaData.badEnds = sessions{sInd,9};
   
   metaData.saveFig = 1; 
   metaData.figDir = 'twImgDir'; 
@@ -110,7 +112,7 @@ recordingPrime = matlab.lang.makeValidName(metaData.Recording); % Session names 
 %% Analysis
 fprintf('> Running analyses \n')
 
-
+% TD THIS BROKE WITH THE TRACKING DATA
 % Average Theta Wave
 epochSize = 0.100;
 [CTA] = plotCycleTriggeredAvg(root, epochSize, metaData, 1); 
@@ -129,24 +131,25 @@ shiftsPerChanDeg = twPhaseShift(CTA.avgThetaWave);
 
 % plot PSD
 % right now we are looking at only one of the channels
-plotPSD(root.lfp.signal(1,1:100000),root)
+%plotPSD(root.lfp.signal(1,1:100000),root)
 
 % Raw LFP: Grabs the raw data from the specified indicies
 ind1 = 650; ind2 = 750; % td Set these to the specified ends from sessions
 [rawWaves] = twGrabRawData(root.user_def.lfp_origData, ind1, ind2, plt);
 
 % compute theta asym
-%[asmScores] = twComputeAsym(root);
+[asmScores] = twComputeAsym(root);
 
 % compute theta speed modulation
 chans = root.user_def.metaData.chOrd;
-[thetaSpdMod_R] = thetaSpdAnalysis(root, chans);
+%[thetaSpdMod_R] = thetaSpdAnalysis(root, chans);
 
 % psd plot: need to pick a channel
 %[psd] = plotPSD(,fs,tText);
 
 %%
 % update rat struct
+ratsComp.idx = ['Rat  ', 'shiftsPerChanDeg  ', 'pd  ', 'asyemetry idx  ', 'metaData  '];
 ratsComp.data = [ratsComp.data; {metaData.Rat, shiftsPerChanDeg, pd, asmScores, metaData}];
 
 
@@ -159,8 +162,10 @@ fprintf('> Saving root & intrastruct... ');
 save(structPath,'ratsComp','-v7.3'); 
 save(pwd, 'root', '-v7.3')
 fprintf('done. \n');
+
 iteration = iteration + 1;
 end
+toc
 
 % add multi rat computations here
 

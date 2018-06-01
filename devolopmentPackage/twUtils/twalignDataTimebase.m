@@ -20,6 +20,8 @@ function twalignDataTimebase(ratName,prefixes,Recording,ephysFolder,bonsaiTime,r
 if ~exist('bonsaiTime','var') || isempty(bonsaiTime), bonsaiTime = cell(size(prefixes)); end
 if ~exist('ephysFolder','var') || isempty(ephysFolder), ephysFolder = cell(size(prefixes)); end
 if ~exist('filetype','var') || isempty(filetype), filetype = 'openephys'; end
+force = 0;
+manual = 0;
 
 for iP = 1:length(prefixes)
   basePath = fullfile(dropboxPath,'ratsEphys',ratName,prefixes{iP});
@@ -27,10 +29,12 @@ for iP = 1:length(prefixes)
   %%%%BSC 170215 - if the final file resulting from this function already
   %exists, then the function has already been run on this session, so go
   %to the next session in prefixes
-%   if exist([basePath filesep 'alignedEphysData.mat'],'file')
-%     disp(['skipping ' prefixes{iP} ' - this session has already been aligned'])
-%     continue
-%   end
+  if force
+    if exist([basePath filesep 'alignedEphysData.mat'],'file')
+      disp(['skipping ' prefixes{iP} ' - this session has already been aligned'])
+      continue
+    end
+  end
   %%%%
   
   % Prompt if multiple bonsai files are found
@@ -38,11 +42,23 @@ for iP = 1:length(prefixes)
   bonsaiFile = dir([basePath filesep 'metadata' bonsaiTime{iP} '.csv']);
   ind = 1;
   if length(bonsaiFile)>1
-    for iF = 1:length(bonsaiFile)
-      disp([num2str(iF) ': ' bonsaiFile(iF).name]);
+    if 1 %manual % 180529 kc 
+      for iF = 1:length(bonsaiFile)
+        disp([num2str(iF) ': ' bonsaiFile(iF).name]);
+      end
+      ind = input('Enter index of Bonsai file: ');
+    else
+      % TD need a systematic way to assess the metadata2017-07-17T19_28_15 files 
+      % will add metadata Bonzai file names to sessionsList...
+      for iF = 1:length(folderList)
+        if folderList{iF}(length(folderList{iF})-length(Recording)+1:end) == Recording
+          ind = iF;
+        end
+      end
     end
-    ind = input('Enter index of Bonsai file: ');   
   end
+  
+  
   tmp = extractBetween(bonsaiFile(ind).name,'metadata','.csv'); % for some reason this outputs a cell
   bonsaiTime{iP} = tmp{1};
   bonsaiFile = [basePath filesep bonsaiFile(ind).name];
@@ -58,7 +74,7 @@ for iP = 1:length(prefixes)
     ind = 1;
     if length(folderList)>1
       % kwc add flag for prompting vs automation
-      if 0
+      if manual
         for iF = 1:length(folderList)
           disp([num2str(iF) ': ' folderList{iF}]);
         end
@@ -66,6 +82,7 @@ for iP = 1:length(prefixes)
       else
         for iF = 1:length(folderList)
           if folderList{iF}(length(folderList{iF})-length(Recording)+1:end) == Recording
+            fprintf(['Chose file ', folderList{iF}]);
             ind = iF;
           end
         end
@@ -83,7 +100,7 @@ for iP = 1:length(prefixes)
       fs = double(h5readatt(ephysFile,'/recordings/0/','sample_rate'));
       ephysTS = [1:length(ephysRef)]./fs; % KWC 180510
     case 'openephys'
-      reference = dir([basePath filesep ephysFolder{iP} filesep '*_ADC' num2str(ref) '.continuous']); 
+      reference = dir([basePath filesep ephysFolder{iP} filesep '*_ADC' num2str(ref) '.continuous']); % 180529 kc changed from *_ADC
       if isempty(reference), reference = dir([basePath filesep ephysFolder{iP} filesep '*_PDI' num2str(ref) '.continuous']); end
       [ephysRef,ephysTS,info] = load_open_ephys_data([reference.folder filesep reference.name]); 
       fs = info.header.sampleRate;

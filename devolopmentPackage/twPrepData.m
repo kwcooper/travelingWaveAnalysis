@@ -7,48 +7,54 @@
 % TD: 
 %     need to look at timestamps
 
+tracking = 0;
 %% grab tracking data
 
 % original script to align tracking, make root, and build fnamesets
 %importDataWTrackingAuto(metaData)
-
-% ... this should be changed? (I automated it)
-twalignDataTimebase(metaData.Rat, {metaData.Session}, metaData.Recording,[],[],metaData.trackRef,metaData.fType); % make position file
-
-%code adapted from invivoimport ~line 149 on 180516
-pos_file = fullfile(ratLibPath,metaData.Rat,metaData.Session,'alignedPositionData.csv'); 
-
-% dacq_pos_3p for 3 LEDs, dacq_pos for 2 LEDs 
-% both files seem to return similar output data on Tio session 1
-[scaleFactor, vid_ts, vid_x, vid_y, vid_headdir, d_epoch] = dacq_pos_3p(pos_file);
-scaleFactor = 115/800; % S- CHANGE FOR PROJECT, make variable % k- these are also the same 
-
-% make lfp timestamps
-b_ts = linspace(0,size(D,2)/fs,size(D,2)+1); b_ts = b_ts(2:end)'; % cut off first to get rid of 0
-
-% !! need to work on video timestamps... 
-% calculate new stamps with mean of current, interpolate with the output stamps
-vid_ts_floor = floor(1/mean(diff(vid_ts)));
-
-
-root = CMBHOME.Session('name', metaData.Rat,...
-                       'epoch', [-inf inf],...
-                       'b_ts', vid_ts,... % as per invivoimport line 154
-                       'fs_video', 1/mean(diff(vid_ts)), ...
-                       'b_x', vid_x, ...
-                       'b_y', vid_y, ...
-                       'raw_pos', 1, ...
-                       'raw_headdir', 1, ...
-                       'b_headdir', vid_headdir, ...
-                       'date_created', now, ...
-                       'epoch', [-inf inf], ...
-                       'fs_video', 1/mean(diff(vid_ts)), ...
-                       'spatial_scale',scaleFactor);
-
-% import lfp time offset: invivoimport line 170 
-ephys_align = fullfile(ratLibPath,metaData.Rat,metaData.Session,'alignedEphysData.mat');
-load(ephys_align,'timestamps','offset','starttime'); 
-
+if tracking
+  % ... this should be changed? (I automated it)
+  twalignDataTimebase(metaData.Rat, {metaData.Session}, metaData.Recording,[],[],metaData.trackRef,metaData.fType); % make position file
+  
+  %code adapted from invivoimport ~line 149 on 180516
+  pos_file = fullfile(ratLibPath,metaData.Rat,metaData.Session,'alignedPositionData.csv');
+  
+  % dacq_pos_3p for 3 LEDs, dacq_pos for 2 LEDs
+  % both files seem to return similar output data on Tio session 1
+  [scaleFactor, vid_ts, vid_x, vid_y, vid_headdir, d_epoch] = dacq_pos_3p(pos_file);
+  scaleFactor = 115/800; % S- CHANGE FOR PROJECT, make variable % k- these are also the same
+  
+  % make lfp timestamps
+  b_ts = linspace(0,size(D,2)/fs,size(D,2)+1); b_ts = b_ts(2:end)'; % cut off first to get rid of 0
+  
+  % !! need to work on video timestamps...
+  % calculate new stamps with mean of current, interpolate with the output stamps
+  vid_ts_floor = floor(1/mean(diff(vid_ts)));
+  
+  
+  root = CMBHOME.Session('name', metaData.Rat,...
+    'epoch', [-inf inf],...
+    'b_ts', vid_ts,... % as per invivoimport line 154
+    'fs_video', 1/mean(diff(vid_ts)), ...
+    'b_x', vid_x, ...
+    'b_y', vid_y, ...
+    'raw_pos', 1, ...
+    'raw_headdir', 1, ...
+    'b_headdir', vid_headdir, ...
+    'date_created', now, ...
+    'epoch', [-inf inf], ...
+    'fs_video', 1/mean(diff(vid_ts)), ...
+    'spatial_scale',scaleFactor);
+  
+  % import lfp time offset: invivoimport line 170
+  ephys_align = fullfile(ratLibPath,metaData.Rat,metaData.Session,'alignedEphysData.mat');
+  load(ephys_align,'timestamps','offset','starttime');
+  
+else
+  b_ts = linspace(0,size(D,2)/fs,size(D,2)+1); b_ts = b_ts(2:end)';
+  root = CMBHOME.Session('name', metaData.Rat, 'epoch', [-inf inf], 'b_ts', b_ts);
+  
+end
 %%
 % store useful data in root
 root.user_def.lfp_origData = D;
@@ -66,8 +72,8 @@ end
 
 % clean data and filter to epochs of good theta
 %filtType = 'thetaDeltaRatio'; filtParams = 2; % works okay, some fine tuning may help further rule out low theta epochs and include 
-filtType = 'thetaMag'; filtParams = [115 1000]  ;  
-[pctDataUsed,inds2cut] = cleanData_Intan(D(metaData.ref,:),fs,filtType,filtParams); 
+filtType = 'thetaMag'; %filtParams = [115 1000]; % Update for each rat  
+[pctDataUsed,inds2cut] = cleanData_Intan(D(metaData.ref,:),fs,filtType,metaData.filtParams); 
 root.user_def.cleanData_inds2cut = inds2cut;
 root.user_def.cleanData_pctDataUsed = pctDataUsed;
 

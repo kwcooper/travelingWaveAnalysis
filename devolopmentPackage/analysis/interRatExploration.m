@@ -19,18 +19,16 @@ ylabel('Offset from first channel (Radians)');
 slopes = [];
 figure; hold on;
 c = ['r', 'g', 'y', 'c', 'b', 'm'];
-for i = 1:size(ratsComp.data, 1)/2
+for i = 1:size(ratsComp.data, 1) / 2 % just look at the first half
   %plot points
-  plot(ratsComp.data{i,3}.x,ratsComp.data{i,3}.dataShift,'k.');
-  hold on;
+  plot(ratsComp.data{i,3}.x,ratsComp.data{i,3}.dataShift,'k.'); hold on;
   %plot line
   plot(ratsComp.data{i,3}.x,ratsComp.data{i,3}.y, c(i));
   slopes(i,:) = ratsComp.data{i,3}.B(1);
-  legendInfo{i+1} = [ratsComp.data{i,1}]; 
+  legendInfo{i} = [ratsComp.data{i,1}]; 
 end
 title('Rat Slopes');
-xlabel('Distance (Channel)');
-ylabel('Offset from first channel (Radians)');
+xlabel('Distance (Channel)'); ylabel('Offset from first channel (Radians)');
 legend(legendInfo) %[findobj(gca,'Type','line')], [legendInfo legendInfo]
 
 

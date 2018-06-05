@@ -39,8 +39,7 @@ if plt % if breaks move h = figure back to top of chunck
   plot(t,lfp_,'k'); axis ij;
   %Change axis to reflect proper channels
   
-  xlabel('Time')
-  ylabel('Channel') % need to update to distance
+  xlabel('Time'); ylabel('Channel'); % need to update to distance
   title(['Averaged Waves: ', metaData.Rat])
   % ltr = text(0.02,0.98,'C','Units', 'Normalized', 'VerticalAlignment', 'Top');
   % s = ltr.FontSize;

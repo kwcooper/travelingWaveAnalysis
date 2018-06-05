@@ -12,18 +12,41 @@
 
 clear all;
 
-
 iteration = 1;
 %sess2run = [1 3 5 7 9]; % FAM
 %sess2run = [2 4 6 8 10]; % NOV
-sess2run = [2 4 6 8 10 1 3 5 7 9]; %NOV & FAM 
+%sess2run = [2 4 6 8 10 1 3 5 7 9]; %NOV & FAM 
 %sess2run = [15 16]; % SCOP & SAL
-%sess2run = [1];
+%sess2run = [2 16 17 18 19]; % best data
+sess2run = [19];
+
+% check for intraRat struct
+ratStruct = 'ratsComp.mat';
+structPath = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave', ratStruct); 
+
+% check if struct exists, if not, check if we want to create it
+if ~exist(structPath, 'file')
+  makeStruct = 1;
+else 
+  makeStruct = input('Intrarat struct found, would you like to make a new one? (type 1 for yes, 0 for no): ');
+  if makeStruct
+    movefile(structPath, [structPath(1:length(structPath) - length(ratStruct)), 'ratsComp_', num2str(now), '.mat']);
+  end
+end
+if makeStruct
+  fprintf('> Creating intrarat struct... ');
+  ratsComp = struct; ratsComp.data = {}; 
+  save(structPath,'ratsComp','-v7.3'); fprintf('saved.\n');
+  
+else
+  warning('> Using existing struct!');
+end
+
 tic
 for i = sess2run %Select which sessions you would like to run
   
   sInd = i; % Selects the session to analyze 
-  force = 0; %TD maybe save the forcing to sessions?
+  force = 1; %TD maybe save the forcing to sessions?
   plt = 0; % Generate figures?
   
   sessionsList; %import the session data  
@@ -88,27 +111,13 @@ for i = sess2run %Select which sessions you would like to run
   end
  
   
-%%
-%Grab the intra-rat struct
-ratStruct = 'ratsComp.mat';
-structPath = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Projects','travelingWave', ratStruct); 
-
-% check if struct exists, if not, create it!
-if ~exist(structPath, 'file')
-  fprintf('> No rat structure found, creating one... ');
-  ratsComp = struct; save(structPath,'ratsComp','-v7.3'); fprintf('saved.\n');
-  foundStruct = load(structPath); ratsComp = foundStruct.ratsComp;
-  ratsComp.data = {}; % add cell array
-else % load it back in
-  foundStruct = load(structPath); fprintf('> Loading in struct\n');
-  ratsComp = foundStruct.ratsComp;
-end
+%% Grab the intra-rat struct
+foundStruct = load(structPath); fprintf('> Loading in struct\n');
+ratsComp = foundStruct.ratsComp;
 
 % Add metadata to the struct
 recordingPrime = matlab.lang.makeValidName(metaData.Recording); % Session names arn't compatable
 %ratsComp.ratRegress.(metaData.Rat).meta = metaData;
-
-
 %% Analysis
 fprintf('> Running analyses \n')
 
@@ -165,7 +174,7 @@ fprintf('done. \n');
 
 iteration = iteration + 1;
 end
-toc
+endT = toc; fprintf(['Took ' num2str(endT/60) ' minutes to run.']);
 
 % add multi rat computations here
 

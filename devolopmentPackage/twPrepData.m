@@ -84,14 +84,25 @@ thetaPhs = nan(size(D));
 thetaAmp = nan(size(D));
 cycles = nan(size(D));
 
+
+% grab peak data
 for i = 1:size(D,1)
   [thetaPhs(i,:),thetaAmp(i,:),~] = extractThetaPhase(D(i,:),fs,'hilbert',[6 10]);
-  [cycles(i,:),~] = parseThetaCycles(thetaPhs(i,:),fs,[6 10]);
+  [cycles(i,:),~] = parseThetaCycles(thetaPhs(i,:),fs,[6 10],0);
 end
+% grab trough data
+for i = 1:size(D,1)
+  [thetaPhsTrough(i,:),thetaAmpTrough(i,:),~] = extractThetaPhase(D(i,:),fs,'hilbert',[6 10]);
+  [cyclesTrough(i,:),~] = parseThetaCycles(thetaPhs(i,:),fs,[6 10],pi); 
+end 
 
 root.user_def.theta_phs = thetaPhs;
 root.user_def.theta_amp = thetaAmp;
 root.user_def.cycles = cycles;
+root.user_def.theta_phsTrough = thetaPhsTrough;
+root.user_def.theta_ampTrough = thetaAmpTrough;
+root.user_def.cyclesTrough = cyclesTrough;
+root.user_def.thetaLFP =  buttfilt(D,[6 10],fs,'bandpass',3)'; % may need to D.T
 
 end
   

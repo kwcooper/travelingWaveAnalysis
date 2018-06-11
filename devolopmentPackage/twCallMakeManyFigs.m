@@ -17,8 +17,8 @@ iteration = 1;
 %sess2run = [2 4 6 8 10]; % NOV
 %sess2run = [2 4 6 8 10 1 3 5 7 9]; %NOV & FAM 
 %sess2run = [15 16]; % SCOP & SAL
-%sess2run = [2 16 17 18 19]; % best data
-sess2run = [19];
+sess2run = [2 17 18 19 20]; % best data
+%sess2run = [18 19];
 
 % check for intraRat struct
 ratStruct = 'ratsComp.mat';
@@ -28,9 +28,9 @@ structPath = fullfile('D:','Dropbox (NewmanLab)','docs (1)','docs_Keiland','Proj
 if ~exist(structPath, 'file')
   makeStruct = 1;
 else 
-  makeStruct = input('Intrarat struct found, would you like to make a new one? (type 1 for yes, 0 for no): ');
+  makeStruct = 1; %input('Intrarat struct found, would you like to make a new one? (type 1 for yes, 0 for no): ');
   if makeStruct
-    movefile(structPath, [structPath(1:length(structPath) - length(ratStruct)), 'ratsComp_', num2str(now), '.mat']);
+    movefile(structPath, fullfile(structPath(1:length(structPath) - length(ratStruct)),'owStructs', ['ratsComp_', num2str(now), '.mat']));
   end
 end
 if makeStruct
@@ -97,13 +97,12 @@ for i = sess2run %Select which sessions you would like to run
   elseif  force || ~exist(fullfile(dataPath, structName), 'file')
     fprintf('> Processing data.\n')
     fnames = dir(fullfile(dataPath,'100_CH*.continuous'));
-    fprintf('  > Fetching the lfp.\n')
-    fprintf('(This may take some time)...\n')
+    fprintf('  > Fetching the lfp. ');
     [D, fs, fType] = kLoadIntanLFP(metaData.chOrd,dataPath,fnames);
     metaData.fType = fType;
     
     % prepData: makes root, grabs tracking, and minor theta computations
-    fprintf('  > Prepping data.\n')
+    fprintf('\n  > Prepping data.\n')
     %fprintf('    > (Cutting out bad epochs and grabbing theta cycles)\n')
     root = twPrepData(D,fs,metaData); rcdng = metaData.Recording;
     save(structName,'root','rcdng','-v7.3');
@@ -156,6 +155,7 @@ chans = root.user_def.metaData.chOrd;
 % psd plot: need to pick a channel
 %[psd] = plotPSD(,fs,tText);
 
+
 %%
 % update rat struct
 ratsComp.idx = ['Rat  ', 'shiftsPerChanDeg  ', 'pd  ', 'asyemetry idx  ', 'metaData  '];
@@ -169,7 +169,7 @@ ratsComp.data = [ratsComp.data; {metaData.Rat, shiftsPerChanDeg, pd, asmScores, 
 % save intra-struct & root
 fprintf('> Saving root & intrastruct... ');
 save(structPath,'ratsComp','-v7.3'); 
-save(pwd, 'root', '-v7.3')
+save(pwd, 'root', '-v7.3');
 fprintf('done. \n');
 
 iteration = iteration + 1;

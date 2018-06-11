@@ -8,7 +8,7 @@ for i = 1:size(root.b_lfp,2)
   asmScores(1:size(asymScores,1), end+1) = asymScores;
 end
 
-mean(asmScores)
+%mean(asmScores)
 
 end
 

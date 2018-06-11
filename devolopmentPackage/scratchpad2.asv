@@ -92,5 +92,4 @@ figure; plot(mean(diffMat, 1))
  
  gradual training
  
- desire; ill will; sloth; regret; doubt
- 
+ desire; ill will; lazynes

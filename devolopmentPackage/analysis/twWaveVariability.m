@@ -7,7 +7,7 @@ function [] = twWaveVariability(root, figData, phs, simu, scan)
 
 
 % TD:
-% see how much we trust this algo....
+% see how much we trust this algo
 
 
 fprintf('\nExploring varibility in theta wave offset...\n');

@@ -1,4 +1,6 @@
 function [lfp_,split] = spreadLFP(lfp,split)
+% r 
+
 if ~exist('split','var') || isempty(split)
   split = 2.5 * rms(double(lfp(:)));
 end

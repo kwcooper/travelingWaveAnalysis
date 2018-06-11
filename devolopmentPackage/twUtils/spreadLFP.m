@@ -1,4 +1,7 @@
 function [lfp_,split] = spreadLFP(lfp,split)
+% returns lfp with offsets for multi channel plotting
+
+
 if ~exist('split','var') || isempty(split)
   split = 2.5 * rms(double(lfp(:)));
 end

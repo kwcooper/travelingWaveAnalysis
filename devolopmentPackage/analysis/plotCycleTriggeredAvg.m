@@ -1,10 +1,23 @@
-function [CTA] = plotCycleTriggeredAvg(root, epochSize, metaData, plt)
+function [CTA] = plotCycleTriggeredAvg(root, epochSize, pt, metaData, plt)
+% plotCycleTriggeredAvg creates the average wave phots averages across n
+% cycles 
+% epochSize:         distance from midpoint +/- (set t0 .100 for 1 cycle)
+% pt:                peak 0; trough pi;
 
 %!! Figure out which channel to do the calculations on (Reference?)
 % TD add adjustments for the anatomical data. 
+% add peak trough analysis
 
-% grab cycles and clean bad ones
-cycles = find(root.user_def.cycles(1,:));
+% grab cycles according to pt
+if pt == 0
+  cycles = find(root.user_def.cycles(1,:));
+  phs = 'Peak';
+elseif pt == pi
+  cycles = find(root.user_def.cyclesTrough(1,:));
+  phs = 'Trough';
+end
+
+ 
 badCycles = root.user_def.cleanData_inds2cut(cycles);
 cycles(badCycles) = [];
 
@@ -40,16 +53,17 @@ if plt % if breaks move h = figure back to top of chunck
   %Change axis to reflect proper channels
   
   xlabel('Time'); ylabel('Channel'); % need to update to distance
-  title(['Averaged Waves: ', metaData.Rat])
+  title(['Averaged Waves: ', metaData.Rat, ' ', num2str(pt)])
   % ltr = text(0.02,0.98,'C','Units', 'Normalized', 'VerticalAlignment', 'Top');
   % s = ltr.FontSize;
   % ltr.FontSize = 12;
   grid on
   
-  
-  plotName = [metaData.Recording '_' metaData.Rat];
+
+  plotName = [metaData.Recording '_' metaData.Rat '_' phs];
   printFigure(gcf, [fullfile(metaData.savePath, 'cycTrigAvg',[plotName,'.',metaData.fig_type])],'imgType',metaData.fig_type);
   fprintf('Saved figure (CycTrig Avg)\n');
+
 end
 
 %Save and reorrient 

@@ -1,6 +1,8 @@
 function standingWaveXcorr(root)
+% computes the cross corrolation 
 
-
+% TD: add saving info for figs
+% 
 
 
 lfp = root.user_def.lfp_origData; % this will probably need to be updated for tracking

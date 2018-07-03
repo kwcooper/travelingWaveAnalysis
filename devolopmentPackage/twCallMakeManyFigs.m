@@ -11,6 +11,7 @@
 % 8. check 
 
 clear all;
+dbstop if error;
 
 iteration = 1;
 %sess2run = [1 3 5 7 9]; % FAM
@@ -120,22 +121,27 @@ recordingPrime = matlab.lang.makeValidName(metaData.Recording); % Session names 
 %% Analysis
 fprintf('> Running analyses \n')
 
+% peak 0; trough pi;
+
 % TD THIS BROKE WITH THE TRACKING DATA
 % Average Theta Wave
 epochSize = 0.100;
-[CTA] = plotCycleTriggeredAvg(root, epochSize, metaData, 1); 
-root.user_def.CTA = CTA;
+[CTA_P] = plotCycleTriggeredAvg(root, epochSize,  0, metaData, 0);
+[CTA_T] = plotCycleTriggeredAvg(root, epochSize, pi, metaData, 0); 
+root.user_def.CTA_P = CTA_P;
+root.user_def.CTA_T = CTA_T;
 
 % Make the cross corrolation plot %Need to update this
 % twCrossCorr(root)
 
+plt = 1;
 % plots the slope of the average offset 
 % pd is a struct that holds the line of fit info
-pd = twPlotPeakDiff(root, metaData, plt); 
+pd = twPlotPeakDiff(root, pi, metaData, plt); 
 root.user_def.pd = pd;
 
 %grab shifts (Degrees)
-shiftsPerChanDeg = twPhaseShift(CTA.avgThetaWave);
+shiftsPerChanDeg = twPhaseShift(CTA_P.avgThetaWave);
 
 % plot PSD
 % right now we are looking at only one of the channels

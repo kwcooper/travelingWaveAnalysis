@@ -1,10 +1,11 @@
-function [lfp_,split] = spreadLFP(lfp,split)
+function [lfp_,splitMult] = spreadLFP(lfp,splitMult)
 % returns lfp with offsets for multi channel plotting
 
 
-if ~exist('split','var') || isempty(split)
-  split = 2.5 * rms(double(lfp(:)));
+if ~exist('splitMult','var') || isempty(splitMult)
+  splitMult = 2.5;
 end
+split = splitMult * rms(double(lfp(:)));
 
 [nElecs,tPts,nSets] = size(lfp);
 lfp_ = lfp/split;

@@ -56,18 +56,66 @@ root.user_def.metaData = metaData;
 % be modified
 layout.hpc = 1:24; % 8*3 = 24
 layout.ec = 25:size(D,1); % rest
-layout.hpcS1 = ;
-layout.hpcS2 = ;
-layout.hpcS3 = ;
+% by shank:
+layout.hpcS1 = 1:8;
+layout.hpcS2 = 9:16;
+layout.hpcS3 = 17:24;
+layout.ecL1 = 25:31;  %7
+layout.ecL2 = 32:37;  %6
+layout.ecL3 = 38:43;  %6
+layout.ecL4 = 44:48;  %5
+layout.ecL5 = 49:53;  %5
+layout.ecL6 = 54:57;  %4
+
+
+%%
+
+hpcSamp = D(layout.hpc,1:1000);
+%Grab frequencies of intrest -> add 3 not two gammas?
+%             th     lg       mg
+freqList = {[6 12],[25 60],[60 120]};
+freqNames = {'th','lg','mg'};
+theta = [freqList{1}];
+
+figure; suptitle('Freq Bands')
+for i = 1:size(freqList,2)
+  subplot(size(freqList,2),1,i)
+  plot(buttfilt(dSamp,freqList{i},fs,'bandpass',3))
+  title(freqNames{i})
+end
+
+figure; suptitle('Hilbert')
+for i = 1:size(freqList,2)
+  subplot(size(freqList,2),1,i)
+  plot(abs(hilbert(buttfilt(dSamp,freqList{i},fs,'bandpass',3))))
+  title(freqNames{i})
+end
+
+
+
+
+%% Data exploration
 
 % each hpc shank has 8 channels 
 hpcD = D(layout.hpc,:);
 ecD = D(layout.ec,:);
 
-numSec = 1; 
+%grab a couple hpc channels for viewing
+hpcS = D(layout.hpc(1:4:end),:);
+hpcS_P = spreadLFP(hpcS(:,1:1000),5);
+figure; plot(hpcS_P');
+
+
+% where did i go wrong on my time calc?
+% the disp lfp does not mach channel 1 in the ss
+% is open ephys filtered? 
+
+numSec = 2; 
+ssOffset = 709 * fs; %ss @ 00:11:49 -> 709s
+offset = ssOffset;
 samp = numSec * fs;
-t = (0:samp);
-figure; plot(t,hpcD(1,1:samp));
+t = linspace(0,numSec,samp);
+figure; plot(t,hpcD(1,1+offset:samp+offset));
 
 
 

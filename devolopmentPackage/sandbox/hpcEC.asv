@@ -55,10 +55,8 @@ root.user_def.metaData = metaData;
 % struct to hold the various cannels for each region... this will need to
 % be modified
 layout.hpc = 1:24; % 8*3 = 24
-layout.ec = 25:size(D,1); % rest
-layout.hpcS1 = ;
-layout.hpcS2 = ;
-layout.hpcS3 = ;
+layout.ec = 25:size(D,1);
+
 
 % each hpc shank has 8 channels 
 hpcD = D(layout.hpc,:);

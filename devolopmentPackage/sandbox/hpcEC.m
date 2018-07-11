@@ -68,9 +68,9 @@ layout.ecL5 = 49:53;  %5
 layout.ecL6 = 54:57;  %4
 
 
-%%
-
-hpcSamp = D(layout.hpc,1:1000);
+%% play with frequencies
+os = 1000;
+hpcSamp = D(layout.hpc(1:8:end),1+os:1000+os)';
 %Grab frequencies of intrest -> add 3 not two gammas?
 %             th     lg       mg
 freqList = {[6 12],[25 60],[60 120]};
@@ -80,19 +80,47 @@ theta = [freqList{1}];
 figure; suptitle('Freq Bands')
 for i = 1:size(freqList,2)
   subplot(size(freqList,2),1,i)
-  plot(buttfilt(dSamp,freqList{i},fs,'bandpass',3))
+  plot(buttfilt(hpcSamp,freqList{i},fs,'bandpass',3))
   title(freqNames{i})
 end
 
 figure; suptitle('Hilbert')
 for i = 1:size(freqList,2)
   subplot(size(freqList,2),1,i)
-  plot(abs(hilbert(buttfilt(dSamp,freqList{i},fs,'bandpass',3))))
+  plot(abs(hilbert(buttfilt(hpcSamp,freqList{i},fs,'bandpass',3))))
   title(freqNames{i})
 end
 
+%% play with power spectrum -> kramer 2013
+x = D(layout.hpc(1),1+os:10000+os);
+dt = 1/fs;
+T = size(x,2) / 500;
+
+xf = fft(x);                       % Compute the Fourier transform of x.
+Sxx = (2*dt^2)/T * xf .* conj(xf); % Compute the power spectrum.
+Sxx = Sxx(1:length(x)/2+1);        % Ignore negative frequencies.
+df = 1/max(T);                     % Determine the frequency resolution.
+fNQ = 1/dt/2;                      % Determine the Nyquist frequency.
+faxis = (0:df:fNQ);                % Construct the frequency axis.
+figure; plot(faxis, Sxx)        
+xlim([0 100])                     
+xlabel('Frequency [Hz]');
+ylabel('Power')                    
+title('Ronaldo CH1 2s Power Spectrum')
+
+figure; plot(faxis, 10*log10(Sxx)) % Plot power versus frequency on decibel scale.
+xlim([0 100])                      
+xlabel('Frequency [Hz]');
+ylabel('Power')                    
+title('Ronaldo CH1 2s Power Spectrum')
+
+%%
+% Read (Pereda et al., 2005; Greenblatt et al., 2012) for general multi-channel material
+% Coherence lit -> Read (Engel et al., 2001)
 
 
+
+% td: average fft across trials or across time? 
 
 %% Data exploration
 

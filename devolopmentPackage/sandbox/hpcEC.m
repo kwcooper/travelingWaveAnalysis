@@ -92,6 +92,7 @@ for i = 1:size(freqList,2)
 end
 
 %% play with power spectrum -> kramer 2013
+
 x = D(layout.hpc(1),1+os:10000+os);
 dt = 1/fs;
 T = size(x,2) / 500;
@@ -99,6 +100,7 @@ T = size(x,2) / 500;
 xf = fft(x);                       % Compute the Fourier transform of x.
 Sxx = (2*dt^2)/T * xf .* conj(xf); % Compute the power spectrum.
 Sxx = Sxx(1:length(x)/2+1);        % Ignore negative frequencies.
+
 df = 1/max(T);                     % Determine the frequency resolution.
 fNQ = 1/dt/2;                      % Determine the Nyquist frequency.
 faxis = (0:df:fNQ);                % Construct the frequency axis.
@@ -114,13 +116,73 @@ xlabel('Frequency [Hz]');
 ylabel('Power')                    
 title('Ronaldo CH1 2s Power Spectrum')
 
+
+
+ch = 1;
+d = hpcD(ch,:);
+dataCut = floor(size(d,2) / fs) * fs; % compute cut off 
+d = d(:,1:dataCut);
+
+% peep as a function of time
+%w = 1; % how many windows do you want? cuts data into chuncks 
+%numIt = size((1,:), 2)/(w*fs);
+psT = nan(fs/2+1,size(d,2)/fs);
+tic 
+c = 1;
+for i = 1:fs:size(d,2)
+[spect,~] = getSpectrum(d(ch,i:i+fs-1),fs);
+psT(:,c) = real(spect);
+c = c + 1;
+end
+toc
+
+%figure; imagesc(psT(1:100,:))
+figure; imagesc(10*log10(psT(1:100,:))); title('Ronaldo Spectrum ch 1 (1s bins)');
+
+% Average fft across time 
+figure; plot(mean(psT(1:100,:),2)); title('Ronaldo hpcCh1 mean activity');
+figure; plot(mean(10*log10(psT(1:100,:)),2)); title('Ronaldo hpcCh1 mean log activity');
+
+
+
+
 %%
 % Read (Pereda et al., 2005; Greenblatt et al., 2012) for general multi-channel material
 % Coherence lit -> Read (Engel et al., 2001)
 
+% how do you chop up the coherence data? 
+x = D(layout.hpc(1:3),1+os:1000+os);
+y = D(layout.hpc(2:4),1+os:1000+os);
 
+K = size(x,1); %Define the number of trials.
+N = size(x,2); %Define the number of indices per trial.
+dt = 1/fs; % dt = t(2) - t(1); %Define the sampling interval.
+T = size(x,2)/fs; %Define the duration of data.
 
-% td: average fft across trials or across time? 
+Sxx = zeros(K,N); %Create variables to save the spectra.
+Syy = zeros(K,N);
+Sxy = zeros(K,N);
+for k=1:K %Compute the spectra for each trial.
+ Sxx(k,:) = 2*dt^2/T * fft(x(k,:)) .* conj(fft(x(k,:)));
+ Syy(k,:) = 2*dt^2/T * fft(y(k,:)) .* conj(fft(y(k,:)));
+ Sxy(k,:) = 2*dt^2/T * fft(x(k,:)) .* conj(fft(y(k,:)));
+end
+
+Sxx = Sxx(:,1:N/2+1); %Ignore negative frequencies.
+Syy = Syy(:,1:N/2+1);
+Sxy = Sxy(:,1:N/2+1);
+Sxx = mean(Sxx,1); %Average the spectra across trials.
+Syy = mean(Syy,1);
+Sxy = mean(Sxy,1);
+cohr = abs(Sxy) ./ (sqrt(Sxx) .* sqrt(Syy)); %Compute the coherence.
+df = 1/max(T); %Determine the frequency resolution.
+fNQ = 1/ dt / 2; %Determine the Nyquist frequency.
+faxis = (0:df:fNQ); %Construct frequency axis.
+figure; plot(faxis, real(cohr)); %Plot the results
+xlim([0 100]); ylim([0 1]) %Set the axes limits
+xlabel('Frequency [Hz]') %Label axes.
+ylabel('Coherence [ ]')
+
 
 %% Data exploration
 

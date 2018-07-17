@@ -1,5 +1,8 @@
-% tw grab asymetry
 function [asmScores] = twComputeAsym(root)
+% Wrapper for thetaAsymmetryAnalysis 
+% Returns list of scores 
+% 180710 kwc
+
 
 asmScores = [];
 for i = 1:size(root.b_lfp,2)

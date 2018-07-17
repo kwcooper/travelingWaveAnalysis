@@ -3,6 +3,8 @@ function [Sxx, faxis] = getSpectrum(d, fs)
 
 % Adapted from Kramer 2013
 
+% need to add tapering
+
 dt = 1/fs;
 T = size(d,2) / 500;
 

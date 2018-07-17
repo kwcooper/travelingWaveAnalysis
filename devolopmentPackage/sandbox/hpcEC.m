@@ -144,6 +144,25 @@ figure; plot(mean(psT(1:100,:),2)); title('Ronaldo hpcCh1 mean activity');
 figure; plot(mean(10*log10(psT(1:100,:)),2)); title('Ronaldo hpcCh1 mean log activity');
 
 
+% TD: should ID peaks, cut and average
+ch = 1;
+d = hpcD(ch,:); 
+wSize = 100
+dataCut = floor(size(d,2) / fs) * fs; % compute cut off 
+d = d(:,1:dataCut);
+
+% peep as a function of time
+%w = 1; % how many windows do you want? cuts data into chuncks 
+%numIt = size((1,:), 2)/(w*fs);
+psT = nan(fs/2+1,size(d,2)/fs);
+tic 
+c = 1;
+for i = 1:fs:size(d,2)
+[spect,~] = getSpectrum(d(ch,i:i+fs-1),fs);
+psT(:,c) = real(spect);
+c = c + 1;
+end
+toc
 
 
 %%

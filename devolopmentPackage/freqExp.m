@@ -28,8 +28,6 @@ end
 
 
 
-
-
 % in bins
 f = 0:length(dSamp)-1;
 figure; plot(f,abs(fft(dSamp)))

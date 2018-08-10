@@ -95,8 +95,8 @@ end
 root.user_def.theta_phs = thetaPhs;
 root.user_def.theta_amp = thetaAmp;
 root.user_def.cycles = cycles;
-root.user_def.theta_phsTrough = thetaPhsTrough;
-root.user_def.theta_ampTrough = thetaAmpTrough;
+%root.user_def.theta_phsTrough = thetaPhsTrough; % these are the same for peaks
+%root.user_def.theta_ampTrough = thetaAmpTrough; % and for troughs, to be removed...
 root.user_def.cyclesTrough = cyclesTrough;
 root.user_def.thetaLFP =  buttfilt(D',[6 10],fs,'bandpass',3)'; % may need to D.T
 

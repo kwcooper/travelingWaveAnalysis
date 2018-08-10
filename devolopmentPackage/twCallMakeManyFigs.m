@@ -18,8 +18,8 @@ iteration = 1;
 %sess2run = [2 4 6 8 10]; % NOV
 %sess2run = [2 4 6 8 10 1 3 5 7 9]; %NOV & FAM 
 %sess2run = [15 16]; % SCOP & SAL
-sess2run = [2 17 18 19 20]; % best data
-%sess2run = [18 19];
+%sess2run = [2 17 18 19 20]; % best data
+sess2run = [20]; % Roble
 
 % check for intraRat struct
 ratStruct = 'ratsComp.mat';

@@ -36,6 +36,12 @@ y = B(1)*x + B(2);
 
 %% 
 
+% make distance series
+distAx(1) = 300; icmt = 560;
+for i = 2:size(x,2)
+  distAx(i) = distAx(i-1) + icmt;
+end
+
 if plt % if brk move y = to after hold
   %check if result is reasonable.
   figure;

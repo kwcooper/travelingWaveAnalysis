@@ -61,6 +61,7 @@ root.user_def.lfp_origData = D;
 root.user_def.lfp_fs = fs;
 root.user_def.metaData = metaData;
 
+
 for i = 1:size(D,1)
   root.b_lfp(i).signal = root.user_def.lfp_origData(i,:)'; 
   root.b_lfp(i).fs = root.user_def.lfp_fs; 
@@ -85,7 +86,7 @@ thetaAmp = nan(size(D));
 cycles = nan(size(D));
 
 
-
+keyboard; 
 for i = 1:size(D,1)
   [thetaPhs(i,:),thetaAmp(i,:),~] = extractThetaPhase(D(i,:),fs,'hilbert',[6 10]);
   [cycles(i,:),~] = parseThetaCycles(thetaPhs(i,:),fs,[6 10],0);         % grab peak data

@@ -86,7 +86,7 @@ thetaAmp = nan(size(D));
 cycles = nan(size(D));
 
 
-keyboard; 
+
 for i = 1:size(D,1)
   [thetaPhs(i,:),thetaAmp(i,:),~] = extractThetaPhase(D(i,:),fs,'hilbert',[6 10]);
   [cycles(i,:),~] = parseThetaCycles(thetaPhs(i,:),fs,[6 10],0);         % grab peak data

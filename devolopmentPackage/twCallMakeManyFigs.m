@@ -19,7 +19,7 @@ iteration = 1;
 %sess2run = [2 4 6 8 10 1 3 5 7 9]; %NOV & FAM 
 %sess2run = [15 16]; % SCOP & SAL
 %sess2run = [2 17 18 19 20]; % best data
-sess2run = [20]; % Roble
+sess2run = [1:6]; % Best sessions 180824
 
 % check for intraRat struct
 ratStruct = 'ratsComp.mat';
@@ -47,7 +47,7 @@ tic
 for i = sess2run %Select which sessions you would like to run
   
   sInd = i; % Selects the session to analyze 
-  force = 1; %TD maybe save the forcing to sessions?
+  force = 0; %TD maybe save the forcing to sessions?
   plt = 0; % Generate figures?
   
   sessionsList; %import the session data  
@@ -62,6 +62,7 @@ for i = sess2run %Select which sessions you would like to run
   metaData.trackRef = sessions{sInd,7};
   metaData.filtParams = sessions{sInd, 8};
   metaData.badEnds = sessions{sInd,9};
+  metaData.dist = sessions{sInd,10};
   
   metaData.saveFig = 1; 
   metaData.figDir = 'twImgDir'; 
@@ -86,7 +87,7 @@ for i = sess2run %Select which sessions you would like to run
     % Check if the saved data is what we think it is
     fprintf('   > Checking session names...');
     %disp(['\n Checking', foundData.Recording, sessions{sInd,3}])
-    if ~strcmp(foundData.rcdng, sessions{sInd,3})
+    if ~strcmp(foundData.rcdng, sessions{sInd,3}) %changed from .rcdng 180830 % changed back 180917
       warning('    > Imported data fields do not match requested session!\n')
       force = 1; % TD add way to move into the forced data recalculation if fields dont match.
       keyboard;
@@ -137,6 +138,8 @@ root.user_def.CTA_T = CTA_T;
 plt = 1;
 % plots the slope of the average offset 
 % pd is a struct that holds the line of fit info
+% uses 0 or pi (pi currently breaks)
+pd = twPlotPeakDiff(root, 0, metaData, plt); 
 pd = twPlotPeakDiff(root, pi, metaData, plt); 
 root.user_def.pd = pd;
 
@@ -160,11 +163,14 @@ chans = root.user_def.metaData.chOrd;
 
 % psd plot: need to pick a channel
 %[psd] = plotPSD(,fs,tText);
+keyboard; 
 
+% check how the slope changes over time 
+twWaveVariability(root, metaData, 0, 0, 0)
 
 %%
 % update rat struct
-ratsComp.idx = ['Rat  ', 'shiftsPerChanDeg  ', 'pd  ', 'asyemetry idx  ', 'metaData  '];
+ratsComp.idx = ['Rat  ', 'shiftsPerChanDeg  ', 'pd  ', 'asymetry idx  ', 'metaData  '];
 ratsComp.data = [ratsComp.data; {metaData.Rat, shiftsPerChanDeg, pd, asmScores, metaData}];
 
 

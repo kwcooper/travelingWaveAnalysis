@@ -33,22 +33,27 @@ switch type
     
   case 'tAmpNormCH1' % theta AMP Normalized to CH1
     tAmpNorm1 = tAmp / max(tAmp(1,:)')';
-    tAmpXC = nan(size(tAmp,1),(size(tAmp,2)*2)-1);
+    tAmpNorm1XC = nan(size(tAmp,1),(size(tAmp,2)*2)-1);
     %figure; plot(spreadLFP(tAmpXCNorm1(1:5,1:10000))')
     % without allocation: 3.079304 seconds | with allocation: 2.860323 seconds
     for i = 1:size(tAmpNorm1,1)
       tAmpNorm1XC(i,:) = xcorr(tAmpNorm1(1,:), tAmpNorm1(i,:));
     end
     
-%     x = [min(tAmpNorm1XC,[],1); max(tAmpNorm1XC,[],1)];
-%     b = bsxfun(@minus,tAmpNorm1XC,x(1,:));
-%     b = bsxfun(@rdivide,b,diff(x,1,1));
-    
-    for i = 1:size(tAmpNorm1XC)
-      b(i,:) = tAmpNorm1XC(i,:) ./ (max(tAmpNorm1XC(1,:)) - min(tAmpNorm1XC(1,:)));
-    end
+    % normalize to channel one to fix axis shift
+    tAmpNorm1XC = tAmpNorm1XC';
+    w = 50; 
+    tA = tAmpNorm1XC(((ceil((size(tAmpNorm1XC,1)/2))-w)):(ceil((size(tAmpNorm1XC,1)/2))+w),:); % 1322036:1322136 roble
+    %tA = tAmpXC( max(tAmpXC(:,1))-50:max(tAmpXC(:,1))+50 , :);
+    x = [min(tA,[],1);max(tA,[],1)];
+    b = bsxfun(@minus,tA,x(1,:));
+    b = bsxfun(@rdivide,b,diff(x,1,1));
+%     for i = 1:size(tAmpNorm1XC)
+%       b(i,:) = tAmpNorm1XC(i,:) ./ (max(tAmpNorm1XC(1,:)) - min(tAmpNorm1XC(1,:)));
+%     end
     %w = 125; figure; plot(tAmpNorm1XC(2:size(ratStruct.lfp,1),size(tAmpNorm1,2)-w:size(tAmpNorm1,2)+w)');
-    figure; w = 50; plot(b(:,((size(b,2)/2)-w):(size(b,2)/2)+w)');
+    %figure; w = 50; plot(b(:,((size(b,2)/2)-w):(size(b,2)/2)+w)');
+    figure; plot(spreadLFP(b')')
     titleStr = [ratStruct.name, ' xcorr theta AMP Normalized to CH1']; title(titleStr);
     
     

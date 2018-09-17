@@ -1,5 +1,9 @@
 function [asymHist,asymWaves,peaksAndTrphs,asymScores] = thetaAsymmetryAnalysis(root)
+% function [asymHist,asymWaves,peaksAndTrphs,asymScores] = thetaAsymmetryAnalysis(root)
+%
+% Asymetry is = log(risingDuration / fallingDuration)
 
+%% Prep needed values
 signal = root.b_lfp(root.active_lfp).signal;
 fs = root.b_lfp(root.active_lfp).fs;
 
@@ -12,7 +16,7 @@ min_dur = fs / 12;
 broadBand = [1 80];
 signal = buttfilt(signal,broadBand,fs,'bandpass',3);
 
-% find filtered theta peaks and troughs
+%% find filtered theta peaks and troughs
 if exist('band','var') & ~isempty(band),	thetarange = minmax(band); 
 else, thetarange = [4 12]; end
 thetaPhs = angle(hilbert(buttfilt(signal,thetarange,fs,'bandpass',3))) + pi;
@@ -43,7 +47,7 @@ trph_iM(max(trph_iM,[],2)>length(signal),:) = []; % drop cycle which extend past
 trphSig = signal(trph_iM);
 trphInd = trphBounds(:,1) + minInd(trphSig,[],2) - 1;
 
-% assemble ordered list of peaks and troughs
+%% assemble ordered list of peaks and troughs
 peaksAndTrphs = [peakInd ones(size(peakInd)); trphInd -ones(size(trphInd))];
 [~,srtInds] = sort(peaksAndTrphs(:,1));
 peaksAndTrphs = peaksAndTrphs(srtInds,:);
@@ -51,6 +55,7 @@ peaksAndTrphs = peaksAndTrphs(srtInds,:);
 % remove double-troughs and double-peaks
 badInds = diff(peaksAndTrphs(:,2))==0;
 peaksAndTrphs(badInds,:) = [];
+
 % remove double-counted inds
 badInds = find(diff(peaksAndTrphs(:,1))==0);
 peaksAndTrphs(badInds,2) = nan; peaksAndTrphs(badInds+1,2) = nan;
@@ -60,6 +65,8 @@ peaksAndTrphs(isnan(peaksAndTrphs(:,2)),:) = [];
 firstTrph = find(peaksAndTrphs(:,2)==-1,1,'first');
 lastTrph = find(peaksAndTrphs(:,2)==-1,1,'last');
 peaksAndTrphs = peaksAndTrphs(firstTrph:lastTrph,:);
+
+%% analyze rise and fall phases
 % get rise and fall times
 cyclDurs = diff(peaksAndTrphs);
 riseDurs = cyclDurs(cyclDurs(:,2)==2,1);
@@ -80,6 +87,7 @@ if iscell(asymScores), asymScores = cell2mat(asymScores); end
 asymScores(isnan(asymScores)) = [];
 asymScores = log(asymScores); % logarithmic scale
 
+%% compile results 
 % compute histogram of asymetries
 [asymHist.counts,asymHist.edges,inds]= histcounts(asymScores,100);
 

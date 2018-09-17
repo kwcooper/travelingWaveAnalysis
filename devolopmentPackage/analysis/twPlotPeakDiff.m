@@ -1,6 +1,6 @@
 function pd = twPlotPeakDiff(root, pt, metaData, plt)
-% Runs a linear regression through peak offset points; plots 
-keyboard;
+% Runs a linear regression through peak offset points; plots & returns points 
+
 % TD: change axis to mm 
 
 % grab cycles according to pt
@@ -8,22 +8,31 @@ if pt == 0
   thetaPhase = root.user_def.theta_phs;
   phs = 'Peak';
 elseif pt == pi
-  thetaPhase = root.user_def.theta_phsTrough;
+  thetaPhase = root.user_def.theta_phs;
   phs = 'Trough';
 end
 
+
+
 %Finds the circular difference (currently just for the first chan to save time)
 dataShift = nan(size(thetaPhase(1,:),1), size(thetaPhase,1));
+dataShiftTS = nan(1, size(thetaPhase(1,:),1), size(thetaPhase,1));  
 for iC1 = 1:size(thetaPhase(1,:),1)
   for iC2 = 1:size(thetaPhase,1)
     dataShift(iC1,iC2) = circmean(circDiff([thetaPhase(iC1,:)', thetaPhase(iC2,:)'],2,'rad'),2);
   end
 end
 
-figure; sze = 1000;
-subplot(3,1,1); plot(thetaPhase(1,1:sze));
-subplot(3,1,2); plot(thetaPhase(2,1:sze));
-subplot(3,1,3); plot(circmean(circDiff([thetaPhase(1,1:sze)', thetaPhase(1,1:sze)'],2,'rad'),2))
+
+
+
+% Trying to understand the stuff
+if 0
+  figure; sze = 1000;
+  subplot(3,1,1); plot(thetaPhase(1,1:sze));
+  subplot(3,1,2); plot(thetaPhase(2,1:sze));
+  subplot(3,1,3); plot(circmean(circDiff([thetaPhase(1,1:sze)', thetaPhase(1,1:sze)'],2,'rad'),2))
+end
 
 
 [dim, chan, len] = size(dataShift);
@@ -37,11 +46,12 @@ y = B(1)*x + B(2);
 %% 
 
 % make distance series
-distAx(1) = 300; icmt = 560;
+distAx(1) = metaData.dist(1); icmt = metaData.dist(2);
 for i = 2:size(x,2)
   distAx(i) = distAx(i-1) + icmt;
 end
 
+x = distAx; % changed from chan to distance
 if plt % if brk move y = to after hold
   %check if result is reasonable.
   figure;
@@ -49,6 +59,7 @@ if plt % if brk move y = to after hold
   hold on;
   plot(x,y);
   title([metaData.Rat, ' ', phs, ' offset | Slope: ' num2str(B(1))]);
+  xlabel([])
   %Axis: circular difrence (phase offset) and channels
   
   plotName = [metaData.Recording '_' metaData.Rat '_' phs];
@@ -56,8 +67,9 @@ if plt % if brk move y = to after hold
   fprintf('Saved figure (peakDiff)\n');
 end
 
-pd.x = x; % elecNum
+pd.x = x; % distance
 pd.dataShift = dataShift; %diffMat
 pd.y = y; % phaseOffset
 pd.B = B; % elecPhaseSlopeInt
+pd.chan = chan; % just in case something breaks this could be useful to have
 end

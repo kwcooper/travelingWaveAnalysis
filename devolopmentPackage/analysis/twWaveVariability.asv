@@ -127,14 +127,17 @@ for i = 1:size(cyclesEpochedInds, 2) - 1
     % make distance series
     distAx(1) = metaData.dist(1); icmt = metaData.dist(2);
     for c = 2:size(cyclesEpochedInds{i}, 1)
-      distAx(c) = distAx(c-1) + icmt;
+      distAx(c) = distAx(i-1) + icmt;
     end
     % figure; plot(1:size(cyclesEpochedInds{i}, 1), cyclesEpochedInds{i}','x')
     [b,stats] = robustfit(1:size(cyclesEpochedInds{i}, 1), cyclesEpochedInds{i}');
     if isequal(b(2),0)
       disp(cyclesEpochedInds{i}')
     end
+      
   end
+  p = polyfit(1:size(cyclesEpochedInds{i}, 1),cyclesEpochedInds{i}',1);
+  cESlopesRobust(i, 1) = b(2); 
   cESlopesRobust(i, 1) = b(2); 
   cECorCoRobust(i, 1) = stats.coeffcorr(2); 
 end

@@ -1,6 +1,7 @@
 function [thetaSpdMod_A,thetaSpdMod_F,fullResults] = thetaSpdModV2(self,fRange,useRot)
 % function [thetaSpdMod_A,thetaSpdMod_F,fullResults] = thetaSpdModV2(self,fRange,useRot)
-% 
+% Requires Root objects
+%
 % 130906 - eln
 % V2 cleaned up some unused code from previous version and
 % implemented greater analysis of acceleration as part of core analysis.

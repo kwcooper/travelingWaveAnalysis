@@ -14,3 +14,7 @@
 % Fourier frequency coefficient represents the signal power at that frequency. 
 % Finally the power spectrum was smoothed using a Gaussian kernel
 % with standard deviation 0.375Hz.
+
+% Need: velocity
+% 
+%

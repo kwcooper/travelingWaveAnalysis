@@ -133,9 +133,9 @@ root.user_def.CTA_P = CTA_P;
 root.user_def.CTA_T = CTA_T;
 
 % Make the cross corrolation plot %Need to update this
-% twCrossCorr(root)
+% twCrossCorr(root)s
 
-plt = 1;
+plt = 0;
 % plots the slope of the average offset 
 % pd is a struct that holds the line of fit info
 % uses 0 or pi (pi currently breaks)
@@ -156,6 +156,19 @@ ind1 = 650; ind2 = 750; % td Set these to the specified ends from sessions
 
 % compute theta asym
 [asmScores] = twComputeAsym(root);
+
+% generate phase locking analysis
+[plv_th, plv_rb] = phaseLocking(root.user_def.lfp_origData,fs);
+figure; imagesc(plv_th); title(["Phase Lock:" metaData.Rat]);
+plotName = [metaData.Recording '_' metaData.Rat '_th'];
+  printFigure(gcf, [fullfile(metaData.savePath, 'phaseLock',[plotName,'.',metaData.fig_type])],'imgType',metaData.fig_type);
+  fprintf('Saved figure (Phs Lock th)\n');
+
+
+figure; imagesc(plv_rb); title(["Phase Lock:" metaData.Rat]); 
+plotName = [metaData.Recording '_' metaData.Rat '_rb'];
+  printFigure(gcf, [fullfile(metaData.savePath, 'phaseLock',[plotName,'.',metaData.fig_type])],'imgType',metaData.fig_type);
+  fprintf('Saved figure (phs lock rb)\n');
 
 % compute theta speed modulation
 chans = root.user_def.metaData.chOrd;

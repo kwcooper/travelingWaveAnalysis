@@ -14,7 +14,8 @@ end
 
 
 
-%Finds the circular difference (currently just for the first chan to save time)
+% Finds the difference in theta phase (currently just for the first chan to save time)
+% Phase locking
 dataShift = nan(size(thetaPhase(1,:),1), size(thetaPhase,1));
 dataShiftTS = nan(1, size(thetaPhase(1,:),1), size(thetaPhase,1));  
 for iC1 = 1:size(thetaPhase(1,:),1)
